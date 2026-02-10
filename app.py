@@ -24,7 +24,7 @@ def list_pngs(view):
         png_dir = TEMP_PNG_DIR
     else:
         png_dir = MSLP_PNG_DIR
-    png_files = sorted([f for f in os.listdir(png_dir) if f.endswith(".png")])
+    png_files = sorted([f"/get_png/{view}/{f}" for f in os.listdir(png_dir) if f.endswith(".png")])
     return jsonify(png_files)
 
 @app.route("/get_png/<view>/<filename>")
