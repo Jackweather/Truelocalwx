@@ -8,8 +8,8 @@ import getpass
 app = Flask(__name__)
 
 # Directories containing the PNG files
-MSLP_PNG_DIR = os.path.join(os.getcwd(), "HRRR_output",  "HRRR", "mslp", "png")
-TEMP_PNG_DIR = os.path.join(os.getcwd(), "HRRR_output", "tmp_2m", "png")
+MSLP_PNG_DIR = os.path.join(os.getcwd(), "HRRR_NY",  "HRRR", "mslp_prate_csnow_NY", "png")
+TEMP_PNG_DIR = os.path.join(os.getcwd(), "HRRR_NY", "tmp_2m_NY", "png")
 
 @app.route("/")
 def index():
@@ -40,8 +40,8 @@ def run_task1():
     def run_all_scripts():
         print("Flask is running as user:", getpass.getuser())  # Print user for debugging
         scripts = [
-            ("/opt/render/project/src/NY/mslp_prate_csnow_NY.py", "/opt/render/project/src/NY"),
-            ("/opt/render/project/src/NY/tmp_2m_NY.py", "/opt/render/project/src/NY"),
+            ("/opt/render/project/src/HRRR_NY/mslp_prate_csnow_NY.py", "/opt/render/project/src/HRRR_NY"),
+            ("/opt/render/project/src/HRRR_NY/tmp_2m_NY.py", "/opt/render/project/src/HRRR_NY"),
            
         ]
         for script, cwd in scripts:
