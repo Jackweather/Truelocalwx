@@ -89,7 +89,7 @@
             margin: 20px;
         }
         #slider {
-            width: 80%;
+            width: 95%;
         }
     </style>
 </head>
@@ -119,6 +119,7 @@
         let pngFiles = [];
         let currentIndex = 0;
         let isTemperatureView = false;
+        let preloadedImages = [];
 
         // Fetch the list of PNG files from the server
         async function fetchPngFiles() {
@@ -126,6 +127,7 @@
             const response = await fetch(`/list_pngs/${view}`);
             if (response.ok) {
                 pngFiles = await response.json();
+                preloadImages(); // Preload images after fetching the list
                 if (pngFiles.length > 0) {
                     document.getElementById("slider").max = pngFiles.length - 1;
                     currentIndex = 0; // Reset to the first image when switching views
@@ -139,16 +141,32 @@
             }
         }
 
+        // Preload images to reduce lag
+        function preloadImages() {
+            preloadedImages = pngFiles.map((url) => {
+                const img = new Image();
+                img.src = url;
+                return img;
+            });
+        }
+
         // Update the displayed image
         function updateImage() {
             const imgElement = document.getElementById("current-image");
-            const view = isTemperatureView ? "temp" : "mslp";
             if (pngFiles.length > 0) {
-                imgElement.src = `/get_png/${view}/${pngFiles[currentIndex]}`;
+                imgElement.src = pngFiles[currentIndex];
                 document.getElementById("slider").value = currentIndex;
             } else {
                 imgElement.src = "";
             }
+        }
+
+        // Automatically fetch new PNGs at regular intervals
+        function startAutoFetch(interval = 5000) { // Updated interval: 5 seconds
+            setInterval(() => {
+                console.log("Fetching new PNGs...");
+                fetchPngFiles();
+            }, interval);
         }
 
         // Handle the slider change
@@ -168,6 +186,7 @@
 
         // Initialize the app
         fetchPngFiles();
+        startAutoFetch(); // Start auto-fetching PNGs
     </script>
 </body>
 </html>
