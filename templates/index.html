@@ -225,65 +225,29 @@
 
         // Handle the Temperature button click
         document.getElementById("temp-button").addEventListener("click", () => {
-            isTemperatureView = !isTemperatureView;
-            document.getElementById("temp-button").textContent = isTemperatureView
-                ? "Switch to Precipitation"
-                : "Switch to Temperature";
-            fetchPngFiles(); // Reload the PNG list when switching views
+            isTemperatureView = true;
+            const view = "temp";
+            saveCurrentView(view); // Save the selected view
+            document.getElementById("temp-button").textContent = "Switch to Precipitation";
+            fetchPngFiles(view); // Reload the PNG list when switching views
         });
 
         // Handle the Snow 8-to-1 button click
         document.getElementById("snow-8-to-1-button").addEventListener("click", () => {
             isTemperatureView = false;
             const view = "snow_8_to_1";
+            saveCurrentView(view); // Save the selected view
             document.getElementById("temp-button").textContent = "Switch to Temperature";
-            fetch(`/list_pngs/${view}`).then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    console.error("Failed to fetch PNG files.");
-                }
-            }).then(data => {
-                if (data) {
-                    pngFiles = data;
-                    preloadImages();
-                    if (pngFiles.length > 0) {
-                        document.getElementById("slider").max = pngFiles.length - 1;
-                        restoreSliderPosition();
-                        updateImage();
-                    } else {
-                        document.getElementById("current-image").src = "";
-                        document.getElementById("slider").max = 0;
-                    }
-                }
-            });
+            fetchPngFiles(view); // Reload the PNG list when switching views
         });
 
         // Handle the Snow 10-to-1 button click
         document.getElementById("snow-10-to-1-button").addEventListener("click", () => {
             isTemperatureView = false;
             const view = "snow_10_to_1";
+            saveCurrentView(view); // Save the selected view
             document.getElementById("temp-button").textContent = "Switch to Temperature";
-            fetch(`/list_pngs/${view}`).then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    console.error("Failed to fetch PNG files.");
-                }
-            }).then(data => {
-                if (data) {
-                    pngFiles = data;
-                    preloadImages();
-                    if (pngFiles.length > 0) {
-                        document.getElementById("slider").max = pngFiles.length - 1;
-                        restoreSliderPosition();
-                        updateImage();
-                    } else {
-                        document.getElementById("current-image").src = "";
-                        document.getElementById("slider").max = 0;
-                    }
-                }
-            });
+            fetchPngFiles(view); // Reload the PNG list when switching views
         });
 
         // Handle left and right arrow key presses for slider navigation
