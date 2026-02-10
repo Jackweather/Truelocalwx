@@ -116,6 +116,7 @@
                     <button id="temp-button">Temperature</button>
                     <button id="snow-8-to-1-button">Snow 8-to-1</button>
                     <button id="snow-10-to-1-button">Snow 10-to-1</button>
+                    <button id="precip-type-rate-button">Precip Type Rate</button>
                 </div>
             </div>
         </div>
@@ -239,7 +240,6 @@
             isTemperatureView = true;
             const view = "temp";
             saveCurrentView(view); // Save the selected view
-            document.getElementById("temp-button").textContent = "Switch to Precipitation";
             fetchPngFiles(view); // Reload the PNG list when switching views
         });
 
@@ -248,7 +248,6 @@
             isTemperatureView = false;
             const view = "snow_8_to_1";
             saveCurrentView(view); // Save the selected view
-            document.getElementById("temp-button").textContent = "Switch to Temperature";
             fetchPngFiles(view); // Reload the PNG list when switching views
         });
 
@@ -257,8 +256,14 @@
             isTemperatureView = false;
             const view = "snow_10_to_1";
             saveCurrentView(view); // Save the selected view
-            document.getElementById("temp-button").textContent = "Switch to Temperature";
             fetchPngFiles(view); // Reload the PNG list when switching views
+        });
+
+        // Handle the Precip Type Rate button click
+        document.getElementById("precip-type-rate-button").addEventListener("click", () => {
+            const view = "precip_type_rate";
+            saveCurrentView(view);
+            fetchPngFiles(view);
         });
 
         // Handle left and right arrow key presses for slider navigation
