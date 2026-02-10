@@ -105,6 +105,8 @@
                 <p>Use the slider to navigate through the images. You can also switch between precipitation and temperature views.</p>
             </div>
             <button id="temp-button">Switch to Temperature</button>
+            <button id="snow-8-to-1-button">Switch to Snow 8-to-1</button>
+            <button id="snow-10-to-1-button">Switch to Snow 10-to-1</button>
         </div>
         <div id="content">
             <div id="image-container">
@@ -165,11 +167,17 @@
         // Restore slider position from localStorage
         function restoreSliderPosition() {
             const savedPosition = localStorage.getItem("sliderPosition");
-            if (savedPosition !== null && savedPosition < pngFiles.length) {
-                currentIndex = parseInt(savedPosition, 10);
+            if (savedPosition !== null && pngFiles.length > 0) {
+                currentIndex = Math.min(parseInt(savedPosition, 10), pngFiles.length - 1);
                 document.getElementById("slider").value = currentIndex;
+                updateImage();
             }
         }
+
+        // Save slider position to localStorage on change
+        document.getElementById("slider").addEventListener("change", (event) => {
+            localStorage.setItem("sliderPosition", event.target.value);
+        });
 
         // Automatically fetch new PNGs at regular intervals
         function startAutoFetch(interval = 5000) { // Updated interval: 5 seconds
@@ -209,6 +217,60 @@
                 ? "Switch to Precipitation"
                 : "Switch to Temperature";
             fetchPngFiles(); // Reload the PNG list when switching views
+        });
+
+        // Handle the Snow 8-to-1 button click
+        document.getElementById("snow-8-to-1-button").addEventListener("click", () => {
+            isTemperatureView = false;
+            const view = "snow_8_to_1";
+            document.getElementById("temp-button").textContent = "Switch to Temperature";
+            fetch(`/list_pngs/${view}`).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    console.error("Failed to fetch PNG files.");
+                }
+            }).then(data => {
+                if (data) {
+                    pngFiles = data;
+                    preloadImages();
+                    if (pngFiles.length > 0) {
+                        document.getElementById("slider").max = pngFiles.length - 1;
+                        restoreSliderPosition();
+                        updateImage();
+                    } else {
+                        document.getElementById("current-image").src = "";
+                        document.getElementById("slider").max = 0;
+                    }
+                }
+            });
+        });
+
+        // Handle the Snow 10-to-1 button click
+        document.getElementById("snow-10-to-1-button").addEventListener("click", () => {
+            isTemperatureView = false;
+            const view = "snow_10_to_1";
+            document.getElementById("temp-button").textContent = "Switch to Temperature";
+            fetch(`/list_pngs/${view}`).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    console.error("Failed to fetch PNG files.");
+                }
+            }).then(data => {
+                if (data) {
+                    pngFiles = data;
+                    preloadImages();
+                    if (pngFiles.length > 0) {
+                        document.getElementById("slider").max = pngFiles.length - 1;
+                        restoreSliderPosition();
+                        updateImage();
+                    } else {
+                        document.getElementById("current-image").src = "";
+                        document.getElementById("slider").max = 0;
+                    }
+                }
+            });
         });
 
         // Handle left and right arrow key presses for slider navigation
