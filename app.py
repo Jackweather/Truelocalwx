@@ -4,62 +4,46 @@ import subprocess
 import traceback
 import threading
 import getpass
-import datetime
 
 app = Flask(__name__)
 
 # Directories containing the PNG files
 BASE_DIR = "/var/data"
-MSLP_PNG_DIR = os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "png")
-TEMP_PNG_DIR = os.path.join(BASE_DIR, "tmp_2m_NY", "png")
-SNOW_8_TO_1_PNG_DIR = os.path.join(BASE_DIR, "snow_8_to_1_NY", "png")
-SNOW_10_TO_1_PNG_DIR = os.path.join(BASE_DIR, "SNOW_10to_1_NY", "png")
+PNG_DIRS = {
+    "mslp": os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "png"),
+    "temp": os.path.join(BASE_DIR, "tmp_2m_NY", "png"),
+    "snow_8_to_1": os.path.join(BASE_DIR, "snow_8_to_1_NY", "png"),
+    "snow_10_to_1": os.path.join(BASE_DIR, "SNOW_10to_1_NY", "png"),
+    "precip_type_rate": os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "png"),
+}
 
 @app.route("/")
 def index():
     # Render the HTML frontend
     return render_template("index.html")
 
-@app.route("/list_pngs/<view>")
-def list_pngs(view):
-    # List all PNG files in the directory based on the view (mslp or temp)
-    if view == "temp":
-        png_dir = TEMP_PNG_DIR
-    else:
-        png_dir = MSLP_PNG_DIR
+def list_png_files(view):
+    # Helper function to list PNG files in a directory
+    png_dir = PNG_DIRS.get(view)
+    if not png_dir:
+        return jsonify({"error": "Invalid view"}), 404
     png_files = sorted([f"/get_png/{view}/{f}" for f in os.listdir(png_dir) if f.endswith(".png")])
     return jsonify(png_files)
 
-@app.route("/get_png/<view>/<filename>")
-def get_png(view, filename):
-    # Serve a specific PNG file based on the view (mslp or temp)
-    if view == "temp":
-        png_dir = TEMP_PNG_DIR
-    else:
-        png_dir = MSLP_PNG_DIR
+def serve_png_file(view, filename):
+    # Helper function to serve a specific PNG file
+    png_dir = PNG_DIRS.get(view)
+    if not png_dir:
+        return jsonify({"error": "Invalid view"}), 404
     return send_from_directory(png_dir, filename)
 
-@app.route("/list_pngs/snow_8_to_1")
-def list_pngs_snow_8_to_1():
-    # List all PNG files in the snow_8_to_1 directory
-    png_files = sorted([f"/get_png/snow_8_to_1/{f}" for f in os.listdir(SNOW_8_TO_1_PNG_DIR) if f.endswith(".png")])
-    return jsonify(png_files)
+@app.route("/list_pngs/<view>")
+def list_pngs(view):
+    return list_png_files(view)
 
-@app.route("/get_png/snow_8_to_1/<filename>")
-def get_png_snow_8_to_1(filename):
-    # Serve a specific PNG file from the snow_8_to_1 directory
-    return send_from_directory(SNOW_8_TO_1_PNG_DIR, filename)
-
-@app.route("/list_pngs/snow_10_to_1")
-def list_pngs_snow_10_to_1():
-    # List all PNG files in the snow_10_to_1 directory
-    png_files = sorted([f"/get_png/snow_10_to_1/{f}" for f in os.listdir(SNOW_10_TO_1_PNG_DIR) if f.endswith(".png")])
-    return jsonify(png_files)
-
-@app.route("/get_png/snow_10_to_1/<filename>")
-def get_png_snow_10_to_1(filename):
-    # Serve a specific PNG file from the snow_10_to_1 directory
-    return send_from_directory(SNOW_10_TO_1_PNG_DIR, filename)
+@app.route("/get_png/<view>/<filename>")
+def get_png(view, filename):
+    return serve_png_file(view, filename)
 
 @app.route("/run-task1")
 def run_task1():
@@ -90,19 +74,6 @@ def run_task1():
     # Run the task in a separate thread
     threading.Thread(target=run_all_scripts).start()
     return "Task started in background! Check logs folder for output.", 200
-
-@app.route("/list_pngs/precip_type_rate")
-def list_pngs_precip_type_rate():
-    # List all PNG files in the precip_type_rate directory
-    precip_type_rate_png_dir = os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "png")
-    png_files = sorted([f"/get_png/precip_type_rate/{f}" for f in os.listdir(precip_type_rate_png_dir) if f.endswith(".png")])
-    return jsonify(png_files)
-
-@app.route("/get_png/precip_type_rate/<filename>")
-def get_png_precip_type_rate(filename):
-    # Serve a specific PNG file from the precip_type_rate directory
-    precip_type_rate_png_dir = os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "png")
-    return send_from_directory(precip_type_rate_png_dir, filename)
 
 if __name__ == "__main__":
     app.run(debug=True)
