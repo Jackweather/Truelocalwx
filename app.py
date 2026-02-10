@@ -8,8 +8,9 @@ import getpass
 app = Flask(__name__)
 
 # Directories containing the PNG files
-MSLP_PNG_DIR = os.path.join(os.getcwd(), "HRRR_NY",  "HRRR", "mslp_prate_csnow_NY", "png")
-TEMP_PNG_DIR = os.path.join(os.getcwd(), "HRRR_NY", "tmp_2m_NY", "png")
+BASE_DIR = "/var/data"
+MSLP_PNG_DIR = os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "png")
+TEMP_PNG_DIR = os.path.join(BASE_DIR, "tmp_2m_NY", "png")
 
 @app.route("/")
 def index():
@@ -42,7 +43,6 @@ def run_task1():
         scripts = [
             ("/opt/render/project/src/HRRR_NY/mslp_prate_csnow_NY.py", "/opt/render/project/src/HRRR_NY"),
             ("/opt/render/project/src/HRRR_NY/tmp_2m_NY.py", "/opt/render/project/src/HRRR_NY"),
-           
         ]
         for script, cwd in scripts:
             try:
