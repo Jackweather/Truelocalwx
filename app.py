@@ -41,8 +41,8 @@ def run_task1():
     def run_all_scripts():
         print("Flask is running as user:", getpass.getuser())  # Print user for debugging
         scripts = [
-            ("/opt/render/project/src/HRRR_NY/mslp_prate_csnow_NY.py", "/opt/render/project/src/HRRR_NY"),
-            ("/opt/render/project/src/HRRR_NY/tmp_2m_NY.py", "/opt/render/project/src/HRRR_NY"),
+            ("/opt/render/project/src/NY/mslp_prate_csnow_NY.py", "/opt/render/project/src/NY"),
+            ("/opt/render/project/src/NY/tmp_2m_NY.py", "/opt/render/project/src/NY"),
         ]
         for script, cwd in scripts:
             try:
