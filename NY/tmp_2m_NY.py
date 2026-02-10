@@ -63,12 +63,24 @@ if os.path.exists(processed_steps_file):
 base_url_hrrr = "https://nomads.ncep.noaa.gov/cgi-bin/filter_hrrr_2d.pl"
 variable_tmp = "TMP"  # 2-meter temperature
 
+# Adjust available hours to include 03Z, 09Z, 15Z, 21Z with a max forecast range of 18 hours
+available_hours = [0, 3, 6, 9, 12, 15, 18, 21]
+max_forecast_hours = {3, 9, 15, 21}  # These runs only go out to 18 hours
+
 # Calculate the most recent HRRR run dynamically
 current_utc_time = datetime.utcnow()
-available_hours = [0, 6, 12, 18]
 most_recent_run_hour = max(h for h in available_hours if h <= current_utc_time.hour)
 most_recent_run_time = current_utc_time.replace(hour=most_recent_run_hour, minute=0, second=0, microsecond=0)
 previous_run_time = most_recent_run_time - timedelta(hours=6)
+
+# Function to get the forecast steps based on the run hour
+def get_forecast_steps(run_hour):
+    if run_hour in max_forecast_hours:
+        return list(range(1, 19))  # 18-hour forecast for 03Z, 09Z, 15Z, 21Z
+    return list(range(1, 49, 3))  # Default 48-hour forecast in 3-hour steps
+
+# Get forecast steps for the current run
+forecast_steps = get_forecast_steps(most_recent_run_hour)
 
 # Function to get date and hour strings for a given run time
 def get_run_strings(run_time):
@@ -97,7 +109,7 @@ custom_cmap = LinearSegmentedColormap.from_list(
 temp_norm = BoundaryNorm(temp_levels, custom_cmap.N)
 
 # Adjust forecast steps to process in chunks of 3
-forecast_steps = list(range(1, 49, 3))  # f01, f04, f07, ..., f46
+forecast_steps = list(range(1, 49, 48))  # f01, f04, f07, ..., f46
 
 # Download functions
 def download_grib(url, file_path):
@@ -263,7 +275,7 @@ clear_folder(png_dir)
 
 # Main process
 for step in forecast_steps:
-    steps_to_process = range(step, step + 5)  # Process 3 steps at a time
+    steps_to_process = range(step, step + 48)  # Process 3 steps at a time
     tmp_gribs = get_hrrr_grib(steps_to_process, "TMP")
     for i, tmp_grib in enumerate(tmp_gribs):
         if tmp_grib:
