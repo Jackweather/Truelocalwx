@@ -123,9 +123,22 @@
         let isTemperatureView = false;
         let preloadedImages = [];
 
-        // Fetch the list of PNG files from the server
-        async function fetchPngFiles() {
-            const view = isTemperatureView ? "temp" : "mslp";
+        // Save the current view to localStorage
+        function saveCurrentView(view) {
+            localStorage.setItem("currentView", view);
+        }
+
+        // Restore the current view from localStorage
+        function restoreCurrentView() {
+            const savedView = localStorage.getItem("currentView");
+            return savedView ? savedView : "mslp"; // Default to "mslp" if no view is saved
+        }
+
+        // Update the fetchPngFiles function to use the restored view
+        async function fetchPngFiles(view = restoreCurrentView()) {
+            saveCurrentView(view); // Save the selected view
+            pngFiles = []; // Clear the previous PNG files
+            currentIndex = 0; // Reset the current index
             const response = await fetch(`/list_pngs/${view}`);
             if (response.ok) {
                 pngFiles = await response.json();
@@ -276,24 +289,18 @@
         // Handle left and right arrow key presses for slider navigation
         document.body.addEventListener("keydown", (event) => {
             const slider = document.getElementById("slider");
-            if (event.key === "ArrowLeft") {
-                // Move slider left (decrease value)
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    slider.value = currentIndex;
-                    updateImage();
-                }
-            } else if (event.key === "ArrowRight") {
-                // Move slider right (increase value)
-                if (currentIndex < slider.max) {
-                    currentIndex++;
-                    slider.value = currentIndex;
-                    updateImage();
-                }
+            if (event.key === "ArrowLeft" && currentIndex > 0) {
+                currentIndex--; // Decrease index by 1
+                slider.value = currentIndex;
+                updateImage();
+            } else if (event.key === "ArrowRight" && currentIndex < slider.max) {
+                currentIndex++; // Increase index by 1
+                slider.value = currentIndex;
+                updateImage();
             }
         });
 
-        // Initialize the app
+        // Initialize the app with the restored view
         fetchPngFiles();
         startAutoFetch(); // Start auto-fetching PNGs
     </script>
