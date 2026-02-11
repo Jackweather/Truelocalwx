@@ -117,6 +117,7 @@
                     <button id="snow-8-to-1-button">Snow 8-to-1</button>
                     <button id="snow-10-to-1-button">Snow 10-to-1</button>
                     <button id="precip-type-rate-button">Precip Type Rate</button>
+                    <button id="wind-button">Wind</button>
                 </div>
             </div>
         </div>
@@ -125,7 +126,7 @@
                 <img id="current-image" src="" alt="HRRR PNG" />
             </div>
             <div id="controls">
-                <input type="range" id="slider" min="0" max="0" value="0">
+                <input type="range" id="slider" min="0" max="0" value="0" step="1">
             </div>
         </div>
     </div>
@@ -154,7 +155,7 @@
             const response = await fetch(`/list_pngs/${view}`);
             if (response.ok) {
                 pngFiles = await response.json();
-                preloadImages(); // Preload images after fetching the list
+                preloadAllImages(); // Preload all images after fetching the list
                 if (pngFiles.length > 0) {
                     document.getElementById("slider").max = pngFiles.length - 1;
                     restoreSliderPosition(); // Restore slider position on page load
@@ -168,20 +169,24 @@
             }
         }
 
-        // Preload images to reduce lag
-        function preloadImages() {
-            preloadedImages = pngFiles.map((url) => {
-                const img = new Image();
-                img.src = `${url}?t=${new Date().getTime()}`; // Add cache-busting query parameter
-                return img;
-            });
+        // Preload all images in the background after fetching the list
+        function preloadAllImages() {
+            if (pngFiles.length > 0) {
+                pngFiles.forEach((file) => {
+                    const img = new Image();
+                    img.src = `${file}?t=${new Date().getTime()}`; // Cache-busting query parameter
+                });
+            }
         }
 
-        // Update the displayed image
+        // Update the displayed image based on the current index
         function updateImage() {
             const imgElement = document.getElementById("current-image");
             if (pngFiles.length > 0) {
-                imgElement.src = `${pngFiles[currentIndex]}?t=${new Date().getTime()}`; // Add cache-busting query parameter
+                const newSrc = `${pngFiles[currentIndex]}?t=${new Date().getTime()}`; // Cache-busting query parameter
+                if (imgElement.src !== newSrc) { // Only update if the source is different
+                    imgElement.src = newSrc;
+                }
                 document.getElementById("slider").value = currentIndex;
                 localStorage.setItem("sliderPosition", currentIndex); // Save slider position
             } else {
@@ -214,8 +219,14 @@
 
         // Handle the slider change
         document.getElementById("slider").addEventListener("input", (event) => {
-            currentIndex = parseInt(event.target.value, 10);
-            updateImage();
+            const newValue = parseInt(event.target.value, 10);
+            if (Math.abs(newValue - currentIndex) === 1) { // Allow only single-step changes
+                currentIndex = newValue;
+                updateImage();
+                preloadAdjacentImages(); // Preload adjacent images for smoother navigation
+            } else {
+                event.target.value = currentIndex; // Revert to the last valid value
+            }
         });
 
         // Handle taps or clicks anywhere on the screen to update the slider
@@ -240,7 +251,9 @@
             isTemperatureView = true;
             const view = "temp";
             saveCurrentView(view); // Save the selected view
-            fetchPngFiles(view); // Reload the PNG list when switching views
+            fetchPngFiles(view).then(() => {
+                document.getElementById("slider").max = pngFiles.length - 1;
+            }); // Reload the PNG list when switching views
         });
 
         // Handle the Snow 8-to-1 button click
@@ -248,7 +261,9 @@
             isTemperatureView = false;
             const view = "snow_8_to_1";
             saveCurrentView(view); // Save the selected view
-            fetchPngFiles(view); // Reload the PNG list when switching views
+            fetchPngFiles(view).then(() => {
+                document.getElementById("slider").max = pngFiles.length - 1;
+            }); // Reload the PNG list when switching views
         });
 
         // Handle the Snow 10-to-1 button click
@@ -256,31 +271,77 @@
             isTemperatureView = false;
             const view = "snow_10_to_1";
             saveCurrentView(view); // Save the selected view
-            fetchPngFiles(view); // Reload the PNG list when switching views
+            fetchPngFiles(view).then(() => {
+                document.getElementById("slider").max = pngFiles.length - 1;
+            }); // Reload the PNG list when switching views
         });
 
         // Handle the Precip Type Rate button click
         document.getElementById("precip-type-rate-button").addEventListener("click", () => {
             const view = "precip_type_rate";
             saveCurrentView(view);
-            fetchPngFiles(view);
+            fetchPngFiles(view).then(() => {
+                document.getElementById("slider").max = pngFiles.length - 1;
+            });
         });
 
-        // Handle left and right arrow key presses for slider navigation
+        // Handle the Wind button click
+        document.getElementById("wind-button").addEventListener("click", () => {
+            const view = "wind";
+            saveCurrentView(view);
+            fetchPngFiles(view).then(() => {
+                document.getElementById("slider").max = pngFiles.length - 1;
+            }); // Reload the PNG list for wind view
+        });
+
+        // Refresh the PNG list and update the slider and image
+        async function refreshPngList(view = restoreCurrentView()) {
+            saveCurrentView(view); // Save the selected view
+            try {
+                const response = await fetch(`/list_pngs/${view}`);
+                if (response.ok) {
+                    pngFiles = await response.json();
+                    currentIndex = 0; // Reset to the first image
+                    document.getElementById("slider").max = pngFiles.length - 1;
+                    document.getElementById("slider").value = currentIndex;
+                    updateImage();
+                    preloadAdjacentImages();
+                } else {
+                    console.error("Failed to fetch PNG files.");
+                    pngFiles = [];
+                    currentIndex = 0;
+                    document.getElementById("slider").max = 0;
+                    updateImage();
+                }
+            } catch (error) {
+                console.error("Error refreshing PNG list:", error);
+            }
+        }
+
+        // Handle left and right arrow key presses for navigation
         document.body.addEventListener("keydown", (event) => {
-            const slider = document.getElementById("slider");
-            if (event.key === "ArrowLeft") {
-                if (currentIndex > 0) {
-                    currentIndex = Math.max(0, currentIndex - 1); // Ensure it decreases by 1
-                    slider.value = currentIndex;
-                    updateImage();
-                }
-            } else if (event.key === "ArrowRight") {
-                if (currentIndex < slider.max) {
-                    currentIndex = Math.min(slider.max, currentIndex + 1); // Ensure it increases by 1
-                    slider.value = currentIndex;
-                    updateImage();
-                }
+            if (event.key === "ArrowLeft" && currentIndex > 0) {
+                currentIndex -= 1; // Move to the previous image by 1
+                document.getElementById("slider").value = currentIndex;
+                updateImage();
+                preloadAdjacentImages();
+            } else if (event.key === "ArrowRight" && currentIndex < pngFiles.length - 1) {
+                currentIndex += 1; // Move to the next image by 1
+                document.getElementById("slider").value = currentIndex;
+                updateImage();
+                preloadAdjacentImages();
+            }
+        });
+
+        // Ensure the slider increments by 1 on mouse drag
+        document.getElementById("slider").addEventListener("input", (event) => {
+            const newValue = parseInt(event.target.value, 10);
+            if (Math.abs(newValue - currentIndex) === 1) { // Allow only single-step changes
+                currentIndex = newValue;
+                updateImage();
+                preloadAdjacentImages(); // Preload adjacent images for smoother navigation
+            } else {
+                event.target.value = currentIndex; // Revert to the last valid value
             }
         });
 
@@ -291,7 +352,7 @@
         });
 
         // Initialize the app with the restored view
-        fetchPngFiles();
+        refreshPngList();
         startAutoFetch(); // Start auto-fetching PNGs
     </script>
 </body>
