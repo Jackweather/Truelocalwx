@@ -64,19 +64,24 @@ def run_task1():
         def run_script(script, cwd):
             with semaphore:
                 try:
-                    result = subprocess.run(
+                    with subprocess.Popen(
                         ["python", script],
-                        check=True, cwd=cwd,
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-                    )
-                    print(f"{os.path.basename(script)} ran successfully!")
-                    print("STDOUT:", result.stdout)
-                    print("STDERR:", result.stderr)
-                except subprocess.CalledProcessError as e:
-                    error_trace = traceback.format_exc()
-                    print(f"Error running {os.path.basename(script)}:\n{error_trace}")
-                    print("STDOUT:", e.stdout)
-                    print("STDERR:", e.stderr)
+                        cwd=cwd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True
+                    ) as process:
+                        for line in process.stdout:
+                            print(line, end="")  # Stream stdout to console
+                        for line in process.stderr:
+                            print(line, end="")  # Stream stderr to console
+                        process.wait()
+                        if process.returncode != 0:
+                            print(f"Error: {os.path.basename(script)} exited with code {process.returncode}")
+                        else:
+                            print(f"{os.path.basename(script)} ran successfully!")
+                except Exception as e:
+                    print(f"Error running {os.path.basename(script)}: {e}")
 
         threads = []
         for script, cwd in scripts:
