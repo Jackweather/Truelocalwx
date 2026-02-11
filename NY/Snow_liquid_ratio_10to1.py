@@ -11,6 +11,7 @@ import numpy as np
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import geopandas as gpd
+import gc  # Add garbage collection module
 
 # --- Utility to fetch NY geojson and compute extent/boundary ---
 def get_ny_geodata(padding_frac=0.09):
@@ -167,13 +168,9 @@ def plot_weasd_surface(weasd_path, step):
         print(f"Required variable 'sdwe' not found in dataset. Available variables: {list(ds_weasd.variables.keys())}")
         return None
 
-
-
     # Convert from kg/m² to inches of snow depth
     snow_to_water_ratio = 10  # Approximation: 10 inches of snow per 1 inch of water equivalent
     weasd = (ds_weasd['sdwe'].values / 25.4) * snow_to_water_ratio
-
-   
 
     lats = ds_weasd['latitude'].values
     lons = ds_weasd['longitude'].values
@@ -258,6 +255,11 @@ def plot_weasd_surface(weasd_path, step):
     png_path = os.path.join(png_dir, f"hrrr_10_to_1_SNOW_NY_{step:02d}.png")
     plt.savefig(png_path, bbox_inches="tight", dpi=300)
     plt.close(fig)
+
+    # Explicitly delete large objects and collect garbage
+    del ds_weasd, weasd, Lon2d, Lat2d, weasd2d, mesh, fig, ax
+    gc.collect()
+
     print(f"Generated PNG: {png_path}")
     return png_path
 
@@ -283,5 +285,9 @@ for step in forecast_steps:
     for i, weasd_grib in enumerate(weasd_gribs):
         if weasd_grib:
             plot_weasd_surface(weasd_grib, step + i)
+
+            # Explicitly delete processed GRIB file and collect garbage
+            del weasd_grib
+            gc.collect()
 
 print("HRRR Surface Snow Depth processing complete.")
