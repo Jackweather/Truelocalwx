@@ -172,7 +172,7 @@
         function preloadImages() {
             preloadedImages = pngFiles.map((url) => {
                 const img = new Image();
-                img.src = url;
+                img.src = `${url}?t=${new Date().getTime()}`; // Add cache-busting query parameter
                 return img;
             });
         }
@@ -181,7 +181,7 @@
         function updateImage() {
             const imgElement = document.getElementById("current-image");
             if (pngFiles.length > 0) {
-                imgElement.src = pngFiles[currentIndex];
+                imgElement.src = `${pngFiles[currentIndex]}?t=${new Date().getTime()}`; // Add cache-busting query parameter
                 document.getElementById("slider").value = currentIndex;
                 localStorage.setItem("sliderPosition", currentIndex); // Save slider position
             } else {
