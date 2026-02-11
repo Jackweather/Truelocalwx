@@ -52,16 +52,15 @@ BASE_DIR = '/var/data'
 grib_dir = os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "grib")
 png_dir = os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "png")
 os.makedirs(grib_dir, exist_ok=True)
-os.makedirs(png_dir, exist_ok=True)
 
-# Remove entire grib folder if it exists (ensures it's truly cleared), then recreate it
-if os.path.isdir(grib_dir):
+# Remove entire png folder if it exists (ensures it's truly cleared), then recreate it
+if os.path.isdir(png_dir):
     try:
-        shutil.rmtree(grib_dir)
-        print(f"Removed existing grib directory: {grib_dir}")
+        shutil.rmtree(png_dir)
+        print(f"Removed existing png directory: {png_dir}")
     except Exception as e:
-        print(f"Failed to remove grib directory {grib_dir}: {e}")
-os.makedirs(grib_dir, exist_ok=True)
+        print(f"Failed to remove png directory {png_dir}: {e}")
+os.makedirs(png_dir, exist_ok=True)
 
 # File to track completed forecast steps for the current run
 processed_steps_file = os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "processed_steps.txt")
