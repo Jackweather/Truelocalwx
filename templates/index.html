@@ -269,14 +269,18 @@
         // Handle left and right arrow key presses for slider navigation
         document.body.addEventListener("keydown", (event) => {
             const slider = document.getElementById("slider");
-            if (event.key === "ArrowLeft" && currentIndex > 0) {
-                currentIndex--; // Decrease index by 1
-                slider.value = currentIndex;
-                updateImage();
-            } else if (event.key === "ArrowRight" && currentIndex < slider.max) {
-                currentIndex++; // Increase index by 1
-                slider.value = currentIndex;
-                updateImage();
+            if (event.key === "ArrowLeft") {
+                if (currentIndex > 0) {
+                    currentIndex--; // Decrease index by 1
+                    slider.value = currentIndex;
+                    updateImage();
+                }
+            } else if (event.key === "ArrowRight") {
+                if (currentIndex < slider.max) {
+                    currentIndex++; // Increase index by 1
+                    slider.value = currentIndex;
+                    updateImage();
+                }
             }
         });
 
