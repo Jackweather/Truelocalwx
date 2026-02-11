@@ -15,6 +15,7 @@ PNG_DIRS = {
     "snow_8_to_1": os.path.join(BASE_DIR, "snow_8_to_1_NY", "png"),
     "snow_10_to_1": os.path.join(BASE_DIR, "SNOW_10to_1_NY", "png"),
     "precip_type_rate": os.path.join(BASE_DIR, "mslp_prate_csnow_NY", "png"),
+    "wind": os.path.join(BASE_DIR, "wind_10m_NY", "png"),
 }
 
 @app.route("/")
@@ -47,7 +48,7 @@ def get_png(view, filename):
 
 @app.route("/run-task1")
 def run_task1():
-    def run_all_scripts():
+    def run_scripts_in_parallel():
         print("Flask is running as user:", getpass.getuser())  # Print user for debugging
         scripts = [
             ("/opt/render/project/src/NY/mslp_prate_csnow_NY.py", "/opt/render/project/src/NY"),
@@ -55,25 +56,41 @@ def run_task1():
             ("/opt/render/project/src/NY/Snow_liquid_ratio_8to1.py", "/opt/render/project/src/NY"),
             ("/opt/render/project/src/NY/Snow_liquid_ratio_10to1.py", "/opt/render/project/src/NY"),
         ]
+
+        # Semaphore to limit the number of concurrent processes
+        semaphore = threading.Semaphore(2)  # Limit to 2 concurrent scripts
+
+        def run_script(script, cwd):
+            with semaphore:
+                try:
+                    result = subprocess.run(
+                        ["python", script],
+                        check=True, cwd=cwd,
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                    )
+                    print(f"{os.path.basename(script)} ran successfully!")
+                    print("STDOUT:", result.stdout)
+                    print("STDERR:", result.stderr)
+                except subprocess.CalledProcessError as e:
+                    error_trace = traceback.format_exc()
+                    print(f"Error running {os.path.basename(script)}:\n{error_trace}")
+                    print("STDOUT:", e.stdout)
+                    print("STDERR:", e.stderr)
+
+        threads = []
         for script, cwd in scripts:
-            try:
-                result = subprocess.run(
-                    ["python", script],
-                    check=True, cwd=cwd,
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-                )
-                print(f"{os.path.basename(script)} ran successfully!")
-                print("STDOUT:", result.stdout)
-                print("STDERR:", result.stderr)
-            except subprocess.CalledProcessError as e:
-                error_trace = traceback.format_exc()
-                print(f"Error running {os.path.basename(script)}:\n{error_trace}")
-                print("STDOUT:", e.stdout)
-                print("STDERR:", e.stderr)
+            thread = threading.Thread(target=run_script, args=(script, cwd))
+            threads.append(thread)
+            thread.start()
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
 
     # Run the task in a separate thread
-    threading.Thread(target=run_all_scripts).start()
+    threading.Thread(target=run_scripts_in_parallel).start()
     return "Task started in background! Check logs folder for output.", 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)
