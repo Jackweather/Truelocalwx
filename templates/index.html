@@ -118,6 +118,7 @@
                     <button id="snow-10-to-1-button">Snow 10-to-1</button>
                     <button id="precip-type-rate-button">Precip Type Rate</button>
                     <button id="wind-button">Wind</button>
+                    <button id="total-precip-button">Total Precip</button>
                 </div>
             </div>
         </div>
@@ -286,6 +287,13 @@
         // Handle the Wind button click
         document.getElementById("wind-button").addEventListener("click", () => {
             const view = "wind";
+            saveCurrentView(view);
+            handleViewButtonClick(view);
+        });
+
+        // Handle the Total Precip button click
+        document.getElementById("total-precip-button").addEventListener("click", () => {
+            const view = "total_precip";
             saveCurrentView(view);
             handleViewButtonClick(view);
         });
