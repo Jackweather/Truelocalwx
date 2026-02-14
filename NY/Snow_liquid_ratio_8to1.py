@@ -7,6 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, BoundaryNorm, ListedColormap
+from matplotlib import patheffects
 import numpy as np
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -279,7 +280,10 @@ def plot_weasd_surface(weasd_path, step):
         fontweight="normal", alpha=0.85,
         transform=ccrs.PlateCarree(),
         zorder=20,
-        path_effects=[plt.matplotlib.patheffects.Stroke(linewidth=1, foreground='white'), plt.matplotlib.patheffects.Normal()]
+        path_effects=[
+            patheffects.Stroke(linewidth=1, foreground='white'),
+            patheffects.Normal()
+        ]
     )
     ax.text(
         text_x, text_y_base, "Truelocalwx.com",
@@ -287,7 +291,10 @@ def plot_weasd_surface(weasd_path, step):
         fontweight="normal", alpha=0.85,
         transform=ccrs.PlateCarree(),
         zorder=20,
-        path_effects=[plt.matplotlib.patheffects.Stroke(linewidth=1, foreground='white'), plt.matplotlib.patheffects.Normal()]
+        path_effects=[
+            patheffects.Stroke(linewidth=1, foreground='white'),
+            patheffects.Normal()
+        ]
     )
 
     # Save PNG
