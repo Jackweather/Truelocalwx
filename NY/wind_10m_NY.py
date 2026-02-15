@@ -147,8 +147,9 @@ def get_hrrr_grib(steps, variables):
 # --- Plotting function ---
 def plot_wind_10m(u_path, v_path, step):
     try:
-        ds_u = xr.open_dataset(u_path, engine="cfgrib")
-        ds_v = xr.open_dataset(v_path, engine="cfgrib")
+        # Use dask chunking for lazy loading
+        ds_u = xr.open_dataset(u_path, engine="cfgrib", chunks={})
+        ds_v = xr.open_dataset(v_path, engine="cfgrib", chunks={})
     except Exception as e:
         print(f"Error opening dataset: {e}")
         return None
@@ -158,6 +159,8 @@ def plot_wind_10m(u_path, v_path, step):
     v = ds_v.get('v10')
     if u is None or v is None:
         print("Required variables not in dataset")
+        ds_u.close()
+        ds_v.close()
         return None
 
     lats = ds_u['latitude'].values
@@ -268,7 +271,9 @@ def plot_wind_10m(u_path, v_path, step):
     plt.close(fig)
 
     # Explicitly delete large objects and collect garbage
-    del ds_u, ds_v, u, v, Lon2d, Lat2d, u2d, v2d, fig, ax
+    ds_u.close()
+    ds_v.close()
+    del u, v, Lon2d, Lat2d, u2d, v2d, fig, ax
     gc.collect()
 
     print(f"Generated PNG: {png_path}")
