@@ -1,3 +1,4 @@
+
 from flask import Flask, jsonify, send_from_directory, render_template
 import os
 import subprocess
@@ -5,7 +6,7 @@ import traceback
 import threading
 import getpass
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="templates", static_url_path="/static")
 
 # Directories containing the PNG files
 BASE_DIR = "/var/data"
@@ -46,6 +47,12 @@ def list_pngs(view):
 @app.route("/get_png/<view>/<filename>")
 def get_png(view, filename):
     return serve_png_file(view, filename)
+
+@app.route('/assets/<path:filename>')
+def serve_asset(filename):
+    # Serve static assets like Logo.png from the assets folder
+    assets_dir = os.path.join(os.path.dirname(__file__), 'assets')
+    return send_from_directory(assets_dir, filename)
 
 @app.route("/run-task1")
 def run_task1():
@@ -102,8 +109,3 @@ def run_task1():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
-
