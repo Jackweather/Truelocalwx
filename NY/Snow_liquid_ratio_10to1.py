@@ -154,11 +154,12 @@ def get_hrrr_grib(steps, variable):
 # --- Plotting function ---
 def plot_weasd_surface(weasd_path, step):
     try:
-        # Add filter_by_keys to resolve the "multiple values for unique key" issue
+        # Use dask chunking for lazy loading
         ds_weasd = xr.open_dataset(
             weasd_path,
             engine="cfgrib",
-            filter_by_keys={"stepType": "accum"}  # Use "accum" for accumulated values
+            filter_by_keys={"stepType": "accum"},
+            chunks={}
         )
     except Exception as e:
         print(f"Error opening dataset: {e}")
@@ -172,6 +173,8 @@ def plot_weasd_surface(weasd_path, step):
     # Convert from kg/m² to inches of snow depth
     snow_to_water_ratio = 10  # Approximation: 10 inches of snow per 1 inch of water equivalent
     weasd = (ds_weasd['sdwe'].values / 25.4) * snow_to_water_ratio
+    # Explicitly close dataset after extracting values
+    ds_weasd.close()
 
     lats = ds_weasd['latitude'].values
     lons = ds_weasd['longitude'].values
@@ -303,7 +306,7 @@ def plot_weasd_surface(weasd_path, step):
     plt.close(fig)
 
     # Explicitly delete large objects and collect garbage
-    del ds_weasd, weasd, Lon2d, Lat2d, weasd2d, mesh, fig, ax
+    del weasd, Lon2d, Lat2d, weasd2d, mesh, fig, ax
     gc.collect()
 
     print(f"Generated PNG: {png_path}")
