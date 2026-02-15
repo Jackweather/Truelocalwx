@@ -141,8 +141,32 @@
             <div id="controls">
                 <input type="range" id="slider" min="0" max="0" value="0" step="1">
             </div>
+            <div id="loading-overlay" style="display:none; position:absolute; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,0.7); z-index:200; align-items:center; justify-content:center;">
+                <div style="display:flex; flex-direction:column; align-items:center;">
+                    <div class="spinner" style="border:8px solid #f3f3f3; border-top:8px solid #3498db; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite;"></div>
+                    <div style="margin-top:16px; font-size:1.2rem; color:#3498db;">Loading images...</div>
+                </div>
+            </div>
         </div>
     </div>
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            #loading-overlay {
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(255,255,255,0.7);
+                z-index: 200;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
     <script>
         let pngFiles = [];
         let currentIndex = 0;
@@ -312,17 +336,38 @@
 
         // Add a delay before enabling navigation after switching views
         async function handleViewButtonClick(view) {
-            saveCurrentView(view); // Save the selected view
-            document.getElementById("slider").disabled = true; // Disable slider
+            saveCurrentView(view);
+            document.getElementById("slider").disabled = true;
             const buttons = document.querySelectorAll(".dropdown-content button");
-            buttons.forEach(button => button.disabled = true); // Disable all buttons
+            buttons.forEach(button => button.disabled = true);
+            showLoadingOverlay();
+            await fetchPngFiles(view);
+            await preloadAllImages();
+            hideLoadingOverlay();
+            document.getElementById("slider").disabled = false;
+            buttons.forEach(button => button.disabled = false);
+        }
+        function showLoadingOverlay() {
+            document.getElementById("loading-overlay").style.display = "flex";
+        }
+        function hideLoadingOverlay() {
+            document.getElementById("loading-overlay").style.display = "none";
+        }
 
-            await fetchPngFiles(view); // Fetch and preload PNGs
-
-            setTimeout(() => {
-                document.getElementById("slider").disabled = false; // Re-enable slider
-                buttons.forEach(button => button.disabled = false); // Re-enable buttons
-            }, 3000); // 3-second delay
+        async function preloadAllImages() {
+            if (pngFiles.length === 0) return;
+            let loadedCount = 0;
+            await Promise.all(pngFiles.map(src => {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = () => {
+                        loadedCount++;
+                        resolve();
+                    };
+                    img.onerror = () => resolve();
+                    img.src = `${src}?t=${new Date().getTime()}`;
+                });
+            }));
         }
 
         // Refresh the PNG list and update the slider and image
