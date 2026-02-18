@@ -47,66 +47,21 @@
             flex-direction: column;
             align-items: flex-start;
         }
-        .dropdown {
-            position: relative;
-            width: 100%;
-        }
-        .dropdown #dropdown-button {
-            background: linear-gradient(90deg, #3498db 60%, #6dd5fa 100%);
+        .nav-btn {
+            background: #41507a;
             color: #fff;
             border: none;
-            padding: 18px 20px;
-            border-radius: 16px;
+            border-radius: 18px;
+            padding: 10px 22px;
+            font-size: 1em;
             cursor: pointer;
-            font-size: 1.15rem;
-            font-weight: 600;
-            width: 100%;
-            text-align: center;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(52,152,219,0.08);
-            transition: background 0.2s, box-shadow 0.2s;
-            -webkit-tap-highlight-color: transparent;
+            margin: 8px 0 0 18px;
+            transition: background 0.18s;
+            width: 140px;
+            text-align: left;
         }
-        .dropdown #dropdown-button:active, .dropdown #dropdown-button:focus {
-            background: linear-gradient(90deg, #2980b9 60%, #3498db 100%);
-            outline: none;
-        }
-        .dropdown-content {
-            position: static;
-            background: none;
-            box-shadow: none;
-            z-index: 1000;
-            width: 100%;
-            display: none;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .dropdown-content button {
-            width: 100%;
-            text-align: center;
-            padding: 18px 0;
-            border: none;
-            background: linear-gradient(90deg, #6dd5fa 0%, #3498db 100%);
-            color: #fff;
-            font-size: 1.08rem;
-            font-weight: 500;
-            border-radius: 14px;
-            margin: 0;
-            margin-bottom: 0;
-            cursor: pointer;
-            box-shadow: 0 1px 4px rgba(52,152,219,0.07);
-            transition: background 0.2s, box-shadow 0.2s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .dropdown-content button:active, .dropdown-content button:focus {
-            background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
-            outline: none;
-        }
-        .dropdown-content button:hover {
-            background: linear-gradient(90deg, #2980b9 0%, #3498db 100%);
-        }
-        .dropdown.active .dropdown-content {
-            display: flex;
+        .nav-btn:hover {
+            background: #263159;
         }
         @media (max-width: 600px) {
             #sidebar {
@@ -150,21 +105,15 @@
 <body>
     <header>
         <h1>New-York State Weather Models</h1>
-        <h2>New York</h2>
     </header>
     <div id="main-container">
         <div id="sidebar">
-            <div class="dropdown" id="view-dropdown">
-                <button id="dropdown-button" tabindex="0">Variables</button>
-                <div class="dropdown-content">
-                    <button id="temp-button" tabindex="0">2m-Temp</button>
-                    <button id="snow-8-to-1-button" tabindex="0">Snow 8-to-1</button>
-                    <button id="snow-10-to-1-button" tabindex="0">Snow 10-to-1</button>
-                    <button id="precip-type-rate-button" tabindex="0">Precip Type Rate</button>
-                    <button id="wind-button" tabindex="0">10m-Wind</button>
-                    <button id="total-precip-button" tabindex="0">Total Precip</button>
-                </div>
-            </div>
+            <button class="nav-btn" id="temp-button">2m-Temp</button>
+            <button class="nav-btn" id="snow-8-to-1-button">Snow 8-to-1</button>
+            <button class="nav-btn" id="snow-10-to-1-button">Snow 10-to-1</button>
+            <button class="nav-btn" id="precip-type-rate-button">Precip Type Rate</button>
+            <button class="nav-btn" id="wind-button">10m-Wind</button>
+            <button class="nav-btn" id="total-precip-button">Total Precip</button>
             <div style="flex:1"></div>
             <img src="../assets/Logo.png" alt="Logo" style="height:170px; width:auto; margin-bottom:10px; align-self:flex-start;" />
         </div>
@@ -215,10 +164,6 @@
     }
     // Wait for DOMContentLoaded to ensure all elements exist
     document.addEventListener('DOMContentLoaded', function() {
-        addTouchAndClick('dropdown-button', function() {
-            const dropdown = document.getElementById('view-dropdown');
-            dropdown.classList.toggle('active');
-        });
         addTouchAndClick('temp-button', function() {
             if (window.tempButtonHandler) window.tempButtonHandler();
         });
