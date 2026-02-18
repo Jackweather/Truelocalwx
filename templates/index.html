@@ -141,6 +141,18 @@
                 max-width: 100%; /* Ensure the image scales to fit the container */
                 max-height: 100%;
             }
+            header {
+                flex-direction: column; /* Stack elements vertically */
+                align-items: center;
+            }
+            #content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .dropdown {
+                margin-top: 20px; /* Add spacing below the image */
+            }
         }
     </style>
 </head>
@@ -190,6 +202,7 @@
         }
         // Wait for DOMContentLoaded to ensure all elements exist
         document.addEventListener('DOMContentLoaded', function() {
+            // Existing event listeners
             addTouchAndClick('temp-button', function() {
                 if (window.tempButtonHandler) window.tempButtonHandler();
             });
@@ -208,6 +221,11 @@
             addTouchAndClick('total-precip-button', function() {
                 if (window.totalPrecipButtonHandler) window.totalPrecipButtonHandler();
             });
+
+            // Trigger "Precip Type Rate" by default
+            if (window.precipTypeRateButtonHandler) {
+                window.precipTypeRateButtonHandler();
+            }
         });
     </script>
 </body>
