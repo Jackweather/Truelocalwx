@@ -30,8 +30,10 @@
         }
         header h1 {
             margin: 0;
-            font-size: 1.5rem;
-            text-align: center;
+            font-size: 1.2rem; /* Reduce font size for smaller screens */
+            white-space: nowrap; /* Prevent text from wrapping */
+            overflow: hidden; /* Hide overflow if necessary */
+            text-overflow: ellipsis; /* Add ellipsis if text overflows */
             flex: 1;
         }
 
@@ -127,6 +129,18 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* Add responsive styles for smaller screens */
+        @media (max-width: 768px) {
+            #image-container {
+                max-width: 100%; /* Allow the image container to take full width */
+                max-height: 80vh; /* Adjust height for better visibility */
+            }
+            #image-container img {
+                max-width: 100%; /* Ensure the image scales to fit the container */
+                max-height: 100%;
+            }
         }
     </style>
 </head>
