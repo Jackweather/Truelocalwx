@@ -5,19 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HRRR PNG Viewer</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        html, body {
+            height: 100%; /* Ensure the body covers the full height */
+            width: 100%; /* Ensure the body covers the full width */
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            background-color: white; /* White space on both sides */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
         #main-container {
+            height: 100%; /* Make the main container fill the screen */
+            display: flex;
+            flex-direction: column;
             width: 80%; /* Main content occupies 80% of the screen */
             max-width: 1200px; /* Optional: Limit the maximum width */
             background-color: #f9f9f9; /* Light background for the main content */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for separation */
+        }
+        @media (max-width: 768px) {
+            #main-container {
+                width: 100%; /* Ensure the container takes full width on smaller screens */
+                max-width: none; /* Remove max-width restriction */
+            }
         }
         header {
             background-color: #87CEEB; /* Light blue */
