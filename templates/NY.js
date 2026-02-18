@@ -120,40 +120,49 @@ document.body.addEventListener("click", (event) => {
 });
 
 // Handle the Temperature button click
-// Expose button handlers for touch/click compatibility (Safari/iPhone)
-window.tempButtonHandler = function() {
+document.getElementById("temp-button").addEventListener("click", () => {
     isTemperatureView = true;
     const view = "temp";
-    saveCurrentView(view);
+    saveCurrentView(view); // Save the selected view
     handleViewButtonClick(view);
-};
-window.snow8to1ButtonHandler = function() {
+});
+
+// Handle the Snow 8-to-1 button click
+document.getElementById("snow-8-to-1-button").addEventListener("click", () => {
     isTemperatureView = false;
     const view = "snow_8_to_1";
-    saveCurrentView(view);
+    saveCurrentView(view); // Save the selected view
     handleViewButtonClick(view);
-};
-window.snow10to1ButtonHandler = function() {
+});
+
+// Handle the Snow 10-to-1 button click
+document.getElementById("snow-10-to-1-button").addEventListener("click", () => {
     isTemperatureView = false;
     const view = "snow_10_to_1";
-    saveCurrentView(view);
+    saveCurrentView(view); // Save the selected view
     handleViewButtonClick(view);
-};
-window.precipTypeRateButtonHandler = function() {
+});
+
+// Handle the Precip Type Rate button click
+document.getElementById("precip-type-rate-button").addEventListener("click", () => {
     const view = "precip_type_rate";
     saveCurrentView(view);
     handleViewButtonClick(view);
-};
-window.windButtonHandler = function() {
+});
+
+// Handle the Wind button click
+document.getElementById("wind-button").addEventListener("click", () => {
     const view = "wind";
     saveCurrentView(view);
     handleViewButtonClick(view);
-};
-window.totalPrecipButtonHandler = function() {
+});
+
+// Handle the Total Precip button click
+document.getElementById("total-precip-button").addEventListener("click", () => {
     const view = "total_precip";
     saveCurrentView(view);
     handleViewButtonClick(view);
-};
+});
 
 // Add a delay before enabling navigation after switching views
 async function handleViewButtonClick(view) {
