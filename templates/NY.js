@@ -260,3 +260,10 @@ document.getElementById("dropdown-button").addEventListener("click", () => {
 // Initialize the app with the restored view
 refreshPngList();
 startAutoFetch(); // Start auto-fetching PNGs
+
+document.querySelectorAll('.dropdown-content button').forEach(button => {
+            button.addEventListener('click', () => {
+                const dropdown = document.getElementById('view-dropdown');
+                dropdown.classList.remove('active');
+            });
+        });
