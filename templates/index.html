@@ -10,14 +10,8 @@
             margin: 0;
             padding: 0;
             display: flex;
-            justify-content: center;
-            background-color: white; /* White space on both sides */
-        }
-        #main-container {
-            width: 80%; /* Main content occupies 80% of the screen */
-            max-width: 1200px; /* Optional: Limit the maximum width */
-            background-color: #f9f9f9; /* Light background for the main content */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow for separation */
+            flex-direction: column;
+            height: 100vh;
         }
         header {
             background-color: #87CEEB; /* Light blue */
@@ -30,65 +24,80 @@
         }
         header h1 {
             margin: 0;
-            font-size: 1.2rem; /* Reduce font size for smaller screens */
-            white-space: nowrap; /* Prevent text from wrapping */
-            overflow: hidden; /* Hide overflow if necessary */
-            text-overflow: ellipsis; /* Add ellipsis if text overflows */
+            font-size: 1.5rem;
+        }
+        header h2 {
+            margin: 0;
+            font-size: 1rem;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        #main-container {
+            display: flex;
             flex: 1;
         }
-
-        /* Dropdown menu styles */
+        #sidebar {
+            width: 20%;
+            background-color: #2c3e50; /* Modern dark blue */
+            color: white;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
         .dropdown {
             position: relative;
-            display: inline-block;
         }
-        .dropdown-button {
-            background: #41507a;
-            color: #fff;
+        .dropdown button {
+            background-color: #3498db; /* Modern blue button */
+            color: white;
             border: none;
-            border-radius: 18px;
-            padding: 10px 22px;
-            font-size: 1em;
+            padding: 10px 15px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background 0.18s;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            text-align: left;
         }
-        .dropdown-button:hover {
-            background: #263159;
+        .dropdown button:hover {
+            background-color: #2980b9; /* Darker blue on hover */
         }
         .dropdown-content {
-            display: none;
             position: absolute;
+            top: 100%;
+            left: 0;
             background-color: #2c3e50;
-            color: white;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            margin-top: 10px;
         }
         .dropdown-content button {
+            width: 100%;
+            text-align: left;
+            padding: 10px;
+            border: none;
             background: none;
             color: white;
-            border: none;
-            padding: 10px;
-            text-align: left;
-            width: 100%;
             cursor: pointer;
         }
         .dropdown-content button:hover {
-            background-color: #41507a;
+            background-color: #34495e;
         }
-        .dropdown:hover .dropdown-content {
-            display: block;
+        .dropdown.active .dropdown-content {
+            display: flex;
         }
-
-        /* Content area */
         #content {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
         }
         #image-container {
             max-width: 90%;
@@ -104,87 +113,27 @@
         #slider {
             width: 95%;
         }
-
-        /* Loading overlay */
-        #loading-overlay {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(255,255,255,0.7);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-        }
-        .spinner {
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid #3498db;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Add responsive styles for smaller screens */
-        @media (max-width: 768px) {
-            #image-container {
-                max-width: 100%; /* Allow the image container to take full width */
-                max-height: 80vh; /* Adjust height for better visibility */
-            }
-            #image-container img {
-                max-width: 100%; /* Ensure the image scales to fit the container */
-                max-height: 100%;
-            }
-            header {
-                flex-direction: column; /* Stack elements vertically */
-                align-items: center;
-            }
-            .dropdown {
-                margin-top: 10px; /* Place the dropdown below the header */
-            }
-            #content {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: space-between; /* Ensure proper spacing */
-            }
-            #image-container {
-                flex: 1; /* Allow the image container to take up the remaining space */
-                max-width: 100%; /* Ensure the image container scales properly */
-                max-height: 80vh; /* Adjust height for better visibility */
-            }
-            #slider {
-                width: 90%; /* Adjust slider width */
-                margin-bottom: 10px; /* Add spacing below the slider */
-            }
-        }
     </style>
 </head>
 <body>
-    <div id="left-sidebar">
-        <div class="dropdown">
-            <button class="dropdown-button">Variables</button>
-            <div class="dropdown-content">
-                <button id="temp-button">2m-Temp</button>
-                <button id="snow-8-to-1-button">Snow 8-to-1</button>
-                <button id="snow-10-to-1-button">Snow 10-to-1</button>
-                <button id="precip-type-rate-button">Precip Type Rate</button>
-                <button id="wind-button">10m-Wind</button>
-                <button id="total-precip-button">Total Precip</button>
+    <header>
+        <h1>New York State Weather Models</h1>
+        
+    </header>
+    <div id="main-container">
+        <div id="sidebar">
+            <div class="dropdown" id="view-dropdown">
+                <button id="dropdown-button">Variables</button>
+                <div class="dropdown-content">
+                    <button id="temp-button">2m-Temp</button>
+                    <button id="snow-8-to-1-button">Snow 8-to-1</button>
+                    <button id="snow-10-to-1-button">Snow 10-to-1</button>
+                    <button id="precip-type-rate-button">Precip Type Rate</button>
+                    <button id="wind-button">10m-Wind</button>
+                    <button id="total-precip-button">Total Precip</button>
+                </div>
             </div>
         </div>
-    </div>
-    <div id="main-container">
-        <header>
-            <h1>New York State Weather Models</h1>
-            <div style="width: 100px;"></div> <!-- Placeholder for alignment -->
-        </header>
         <div id="content">
             <div id="image-container">
                 <img id="current-image" src="" alt="HRRR PNG" />
@@ -192,53 +141,295 @@
             <div id="controls">
                 <input type="range" id="slider" min="0" max="0" value="0" step="1">
             </div>
-            <div id="loading-overlay">
+            <div id="loading-overlay" style="display:none; position:absolute; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,0.7); z-index:200; align-items:center; justify-content:center;">
                 <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div class="spinner"></div>
+                    <div class="spinner" style="border:8px solid #f3f3f3; border-top:8px solid #3498db; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite;"></div>
                     <div style="margin-top:16px; font-size:1.2rem; color:#3498db;">Loading images...</div>
                 </div>
             </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='NY.js') }}"></script>
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            #loading-overlay {
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(255,255,255,0.7);
+                z-index: 200;
+                align-items: center;
+                justify-content: center;
+            }
+        </style>
     <script>
-        // Add touch event support for Safari on iPhones
-        function addTouchAndClick(id, handler) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.addEventListener('click', handler);
-            el.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                handler(e);
-            }, {passive: false});
-        }
-        // Wait for DOMContentLoaded to ensure all elements exist
-        document.addEventListener('DOMContentLoaded', function() {
-            // Existing event listeners
-            addTouchAndClick('temp-button', function() {
-                if (window.tempButtonHandler) window.tempButtonHandler();
-            });
-            addTouchAndClick('snow-8-to-1-button', function() {
-                if (window.snow8to1ButtonHandler) window.snow8to1ButtonHandler();
-            });
-            addTouchAndClick('snow-10-to-1-button', function() {
-                if (window.snow10to1ButtonHandler) window.snow10to1ButtonHandler();
-            });
-            addTouchAndClick('precip-type-rate-button', function() {
-                if (window.precipTypeRateButtonHandler) window.precipTypeRateButtonHandler();
-            });
-            addTouchAndClick('wind-button', function() {
-                if (window.windButtonHandler) window.windButtonHandler();
-            });
-            addTouchAndClick('total-precip-button', function() {
-                if (window.totalPrecipButtonHandler) window.totalPrecipButtonHandler();
-            });
+        let pngFiles = [];
+        let currentIndex = 0;
+        let isTemperatureView = false;
+        let preloadedImages = [];
 
-            // Trigger "Precip Type Rate" by default
-            if (window.precipTypeRateButtonHandler) {
-                window.precipTypeRateButtonHandler();
+        // Save the current view to localStorage
+        function saveCurrentView(view) {
+            localStorage.setItem("currentView", view);
+        }
+
+        // Restore the current view from localStorage
+        function restoreCurrentView() {
+            const savedView = localStorage.getItem("currentView");
+            return savedView ? savedView : "mslp"; // Default to "mslp" if no view is saved
+        }
+
+        // Update the fetchPngFiles function to use the restored view
+        async function fetchPngFiles(view = restoreCurrentView()) {
+            saveCurrentView(view); // Save the selected view
+            pngFiles = []; // Clear the previous PNG files
+            currentIndex = 0; // Reset the current index
+            preloadedImages = []; // Clear preloaded images
+            const response = await fetch(`/list_pngs/${view}`);
+            if (response.ok) {
+                pngFiles = await response.json();
+                if (pngFiles.length > 0) {
+                    document.getElementById("slider").max = pngFiles.length - 1;
+                    restoreSliderPosition(); // Restore slider position on page load
+                    updateImage();
+                    preloadAdjacentImages(); // Preload nearby images
+                } else {
+                    document.getElementById("current-image").src = "";
+                    document.getElementById("slider").max = 0;
+                }
+            } else {
+                console.error("Failed to fetch PNG files.");
+            }
+        }
+
+        // Preload a limited number of images around the current index
+        function preloadAdjacentImages() {
+            const range = 2; // Number of images to preload before and after the current index
+            const start = Math.max(0, currentIndex - range);
+            const end = Math.min(pngFiles.length - 1, currentIndex + range);
+
+            for (let i = start; i <= end; i++) {
+                if (!preloadedImages.includes(pngFiles[i])) {
+                    const img = new Image();
+                    img.src = `${pngFiles[i]}?t=${new Date().getTime()}`; // Cache-busting query parameter
+                    preloadedImages.push(pngFiles[i]);
+                }
+            }
+        }
+
+        // Update the displayed image based on the current index
+        function updateImage() {
+            const imgElement = document.getElementById("current-image");
+            if (pngFiles.length > 0) {
+                const newSrc = `${pngFiles[currentIndex]}?t=${new Date().getTime()}`; // Cache-busting query parameter
+                if (imgElement.src !== newSrc) { // Only update if the source is different
+                    imgElement.src = newSrc;
+                }
+                document.getElementById("slider").value = currentIndex;
+                localStorage.setItem("sliderPosition", currentIndex); // Save slider position
+            } else {
+                imgElement.src = "";
+            }
+        }
+
+        // Restore slider position from localStorage
+        function restoreSliderPosition() {
+            const savedPosition = localStorage.getItem("sliderPosition");
+            if (savedPosition !== null && pngFiles.length > 0) {
+                currentIndex = Math.min(parseInt(savedPosition, 10), pngFiles.length - 1);
+                document.getElementById("slider").value = currentIndex;
+                updateImage();
+            }
+        }
+
+        // Save slider position to localStorage on change
+        document.getElementById("slider").addEventListener("change", (event) => {
+            localStorage.setItem("sliderPosition", event.target.value);
+        });
+
+        // Automatically fetch new PNGs at regular intervals
+        function startAutoFetch(interval = 5000) { // Updated interval: 5 seconds
+            setInterval(() => {
+                console.log("Fetching new PNGs...");
+                fetchPngFiles();
+            }, interval);
+        }
+
+        // Handle the slider change
+        document.getElementById("slider").addEventListener("input", (event) => {
+            const newValue = parseInt(event.target.value, 10);
+            if (Math.abs(newValue - currentIndex) === 1) { // Allow only single-step changes
+                currentIndex = newValue;
+                updateImage();
+                preloadAdjacentImages(); // Preload adjacent images for smoother navigation
+            } else {
+                event.target.value = currentIndex; // Revert to the last valid value
             }
         });
+
+        // Handle taps or clicks anywhere on the screen to update the slider
+        document.body.addEventListener("click", (event) => {
+            const slider = document.getElementById("slider");
+            const rect = slider.getBoundingClientRect();
+            const clickX = event.clientX;
+
+            // Check if the click is within the slider's horizontal bounds
+            if (clickX >= rect.left && clickX <= rect.right) {
+                const sliderWidth = rect.width;
+                const relativeClickX = clickX - rect.left;
+                const newSliderValue = Math.round((relativeClickX / sliderWidth) * slider.max);
+                slider.value = newSliderValue;
+                currentIndex = newSliderValue;
+                updateImage();
+            }
+        });
+
+        // Handle the Temperature button click
+        document.getElementById("temp-button").addEventListener("click", () => {
+            isTemperatureView = true;
+            const view = "temp";
+            saveCurrentView(view); // Save the selected view
+            handleViewButtonClick(view);
+        });
+
+        // Handle the Snow 8-to-1 button click
+        document.getElementById("snow-8-to-1-button").addEventListener("click", () => {
+            isTemperatureView = false;
+            const view = "snow_8_to_1";
+            saveCurrentView(view); // Save the selected view
+            handleViewButtonClick(view);
+        });
+
+        // Handle the Snow 10-to-1 button click
+        document.getElementById("snow-10-to-1-button").addEventListener("click", () => {
+            isTemperatureView = false;
+            const view = "snow_10_to_1";
+            saveCurrentView(view); // Save the selected view
+            handleViewButtonClick(view);
+        });
+
+        // Handle the Precip Type Rate button click
+        document.getElementById("precip-type-rate-button").addEventListener("click", () => {
+            const view = "precip_type_rate";
+            saveCurrentView(view);
+            handleViewButtonClick(view);
+        });
+
+        // Handle the Wind button click
+        document.getElementById("wind-button").addEventListener("click", () => {
+            const view = "wind";
+            saveCurrentView(view);
+            handleViewButtonClick(view);
+        });
+
+        // Handle the Total Precip button click
+        document.getElementById("total-precip-button").addEventListener("click", () => {
+            const view = "total_precip";
+            saveCurrentView(view);
+            handleViewButtonClick(view);
+        });
+
+        // Add a delay before enabling navigation after switching views
+        async function handleViewButtonClick(view) {
+            saveCurrentView(view);
+            document.getElementById("slider").disabled = true;
+            const buttons = document.querySelectorAll(".dropdown-content button");
+            buttons.forEach(button => button.disabled = true);
+            showLoadingOverlay();
+            await fetchPngFiles(view);
+            await preloadAllImages();
+            hideLoadingOverlay();
+            document.getElementById("slider").disabled = false;
+            buttons.forEach(button => button.disabled = false);
+        }
+        function showLoadingOverlay() {
+            document.getElementById("loading-overlay").style.display = "flex";
+        }
+        function hideLoadingOverlay() {
+            document.getElementById("loading-overlay").style.display = "none";
+        }
+
+        async function preloadAllImages() {
+            if (pngFiles.length === 0) return;
+            let loadedCount = 0;
+            await Promise.all(pngFiles.map(src => {
+                return new Promise(resolve => {
+                    const img = new Image();
+                    img.onload = () => {
+                        loadedCount++;
+                        resolve();
+                    };
+                    img.onerror = () => resolve();
+                    img.src = `${src}?t=${new Date().getTime()}`;
+                });
+            }));
+        }
+
+        // Refresh the PNG list and update the slider and image
+        async function refreshPngList(view = restoreCurrentView()) {
+            saveCurrentView(view); // Save the selected view
+            try {
+                const response = await fetch(`/list_pngs/${view}`);
+                if (response.ok) {
+                    pngFiles = await response.json();
+                    currentIndex = 0; // Reset to the first image
+                    document.getElementById("slider").max = pngFiles.length - 1;
+                    document.getElementById("slider").value = currentIndex;
+                    updateImage();
+                    preloadAdjacentImages();
+                } else {
+                    console.error("Failed to fetch PNG files.");
+                    pngFiles = [];
+                    currentIndex = 0;
+                    document.getElementById("slider").max = 0;
+                    updateImage();
+                }
+            } catch (error) {
+                console.error("Error refreshing PNG list:", error);
+            }
+        }
+
+        // Handle left and right arrow key presses for navigation
+        document.body.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft" && currentIndex > 0) {
+                currentIndex -= 1; // Move to the previous image by 1
+                document.getElementById("slider").value = currentIndex;
+                updateImage();
+                preloadAdjacentImages();
+            } else if (event.key === "ArrowRight" && currentIndex < pngFiles.length - 1) {
+                currentIndex += 1; // Move to the next image by 1
+                document.getElementById("slider").value = currentIndex;
+                updateImage();
+                preloadAdjacentImages();
+            }
+        });
+
+        // Ensure the slider increments by 1 on mouse drag
+        document.getElementById("slider").addEventListener("input", (event) => {
+            const newValue = parseInt(event.target.value, 10);
+            if (Math.abs(newValue - currentIndex) === 1) { // Allow only single-step changes
+                currentIndex = newValue;
+                updateImage();
+                preloadAdjacentImages(); // Preload adjacent images for smoother navigation
+            } else {
+                event.target.value = currentIndex; // Revert to the last valid value
+            }
+        });
+
+        // Toggle dropdown visibility
+        document.getElementById("dropdown-button").addEventListener("click", () => {
+            const dropdown = document.getElementById("view-dropdown");
+            dropdown.classList.toggle("active");
+        });
+
+        // Initialize the app with the restored view
+        refreshPngList();
+        startAutoFetch(); // Start auto-fetching PNGs
     </script>
 </body>
 </html>
