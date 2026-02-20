@@ -2,6 +2,10 @@ let pngFiles = [];
 let currentIndex = 0;
 let isTemperatureView = false;
 let preloadedImages = [];
+// iPhone-specific state
+let iphonePngFiles = [];
+let iphoneCurrentIndex = 0;
+let iphonePreloadedImages = [];
 
 // Save the current view to localStorage
 function saveCurrentView(view) {
@@ -61,17 +65,6 @@ function updateImage() {
             imgElement.src = newSrc;
         }
         document.getElementById("slider").value = currentIndex;
-        const enlargedImg = document.getElementById("enlarged-image");
-        if (enlargedImg) {
-            if (enlargedImg.src !== newSrc) enlargedImg.src = newSrc;
-        }
-        // Update enlarged slider if present
-        const enlargedSlider = document.getElementById("enlarged-slider");
-        if (enlargedSlider) {
-            enlargedSlider.max = pngFiles.length - 1;
-            enlargedSlider.value = currentIndex;
-        }
-        document.getElementById("slider").value = currentIndex;
         localStorage.setItem("sliderPosition", currentIndex); // Save slider position
     } else {
         imgElement.src = "";
@@ -84,11 +77,6 @@ function restoreSliderPosition() {
     if (savedPosition !== null && pngFiles.length > 0) {
         currentIndex = Math.min(parseInt(savedPosition, 10), pngFiles.length - 1);
         document.getElementById("slider").value = currentIndex;
-        const enlargedSlider = document.getElementById("enlarged-slider");
-        if (enlargedSlider) {
-            enlargedSlider.max = pngFiles.length - 1;
-            enlargedSlider.value = currentIndex;
-        }
         updateImage();
     }
 }
@@ -97,14 +85,6 @@ function restoreSliderPosition() {
 document.getElementById("slider").addEventListener("change", (event) => {
     localStorage.setItem("sliderPosition", event.target.value);
 });
-
-// Save enlarged slider position to localStorage when changed
-const enlargedSliderEl = document.getElementById("enlarged-slider");
-if (enlargedSliderEl) {
-    enlargedSliderEl.addEventListener("change", (event) => {
-        localStorage.setItem("sliderPosition", event.target.value);
-    });
-}
 
 // Automatically fetch new PNGs at regular intervals
 function startAutoFetch(interval = 5000) { // Updated interval: 5 seconds
@@ -142,26 +122,6 @@ document.body.addEventListener("click", (event) => {
         updateImage();
     }
 });
-
-// Handle taps or clicks on the enlarge overlay to update the enlarged slider
-const enlargeOverlay = document.getElementById('enlarge-overlay');
-if (enlargeOverlay) {
-    enlargeOverlay.addEventListener('click', (event) => {
-        const enlargedSlider = document.getElementById('enlarged-slider');
-        if (!enlargedSlider) return;
-        const rect = enlargedSlider.getBoundingClientRect();
-        const clickX = event.clientX;
-        if (clickX >= rect.left && clickX <= rect.right) {
-            const sliderWidth = rect.width;
-            const relativeClickX = clickX - rect.left;
-            const newSliderValue = Math.round((relativeClickX / sliderWidth) * enlargedSlider.max);
-            enlargedSlider.value = newSliderValue;
-            currentIndex = newSliderValue;
-            updateImage();
-            preloadAdjacentImages();
-        }
-    });
-}
 
 // Handle the Temperature button click
 document.getElementById("temp-button").addEventListener("click", () => {
@@ -220,12 +180,6 @@ async function handleViewButtonClick(view) {
     hideLoadingOverlay();
     document.getElementById("slider").disabled = false;
     buttons.forEach(button => button.disabled = false);
-    // Keep enlarged slider synced
-    const enlargedSlider = document.getElementById('enlarged-slider');
-    if (enlargedSlider) {
-        enlargedSlider.max = pngFiles.length - 1;
-        enlargedSlider.value = currentIndex;
-    }
 }
 function showLoadingOverlay() {
     document.getElementById("loading-overlay").style.display = "flex";
@@ -279,15 +233,11 @@ document.body.addEventListener("keydown", (event) => {
     if (event.key === "ArrowLeft" && currentIndex > 0) {
         currentIndex -= 1; // Move to the previous image by 1
         document.getElementById("slider").value = currentIndex;
-        const enlargedSlider = document.getElementById('enlarged-slider');
-        if (enlargedSlider) enlargedSlider.value = currentIndex;
         updateImage();
         preloadAdjacentImages();
     } else if (event.key === "ArrowRight" && currentIndex < pngFiles.length - 1) {
         currentIndex += 1; // Move to the next image by 1
         document.getElementById("slider").value = currentIndex;
-        const enlargedSlider = document.getElementById('enlarged-slider');
-        if (enlargedSlider) enlargedSlider.value = currentIndex;
         updateImage();
         preloadAdjacentImages();
     }
@@ -305,77 +255,11 @@ document.getElementById("slider").addEventListener("input", (event) => {
     }
 });
 
-// Ensure the enlarged slider behaves the same
-const enlargedSlider = document.getElementById('enlarged-slider');
-if (enlargedSlider) {
-    enlargedSlider.addEventListener('input', (event) => {
-        const newValue = parseInt(event.target.value, 10);
-        if (Math.abs(newValue - currentIndex) === 1) {
-            currentIndex = newValue;
-            document.getElementById('slider').value = currentIndex;
-            updateImage();
-            preloadAdjacentImages();
-        } else {
-            event.target.value = currentIndex;
-        }
-    });
-}
-
 // Toggle dropdown visibility
 document.getElementById("dropdown-button").addEventListener("click", () => {
     const dropdown = document.getElementById("view-dropdown");
     dropdown.classList.toggle("active");
 });
-
-// Toggle enlarge overlay dropdown
-const enlargeDropdownButton = document.getElementById('enlarge-dropdown-button');
-if (enlargeDropdownButton) {
-    enlargeDropdownButton.addEventListener('click', () => {
-        const dropdown = document.getElementById('enlarge-view-dropdown');
-        dropdown.classList.toggle('active');
-    });
-}
-
-// Enlarge button opens the overlay
-const enlargeBtn = document.getElementById('enlarge-button');
-if (enlargeBtn) {
-    enlargeBtn.addEventListener('click', () => {
-        const overlay = document.getElementById('enlarge-overlay');
-        if (!overlay) return;
-        overlay.style.display = 'flex';
-        // sync enlarged image and slider
-        const enlargedImg = document.getElementById('enlarged-image');
-        if (enlargedImg && pngFiles.length > 0) enlargedImg.src = `${pngFiles[currentIndex]}?t=${new Date().getTime()}`;
-        const enlargedSlider = document.getElementById('enlarged-slider');
-        if (enlargedSlider) {
-            enlargedSlider.max = pngFiles.length > 0 ? pngFiles.length - 1 : 0;
-            enlargedSlider.value = currentIndex;
-        }
-    });
-}
-
-// Close enlarge overlay
-const closeEnlarge = document.getElementById('close-enlarge');
-if (closeEnlarge) {
-    closeEnlarge.addEventListener('click', () => {
-        const overlay = document.getElementById('enlarge-overlay');
-        if (overlay) overlay.style.display = 'none';
-    });
-}
-
-// Handle clicks on the small dropdown inside overlay to change view
-const overlayDropdownButtons = document.querySelectorAll('#enlarge-overlay .dropdown-content button');
-if (overlayDropdownButtons.length) {
-    overlayDropdownButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const view = btn.getAttribute('data-view');
-            if (view) handleViewButtonClick(view);
-            // close the overlay dropdown
-            const dd = document.getElementById('enlarge-view-dropdown');
-            if (dd) dd.classList.remove('active');
-        });
-    });
-}
 
 // Initialize the app with the restored view
 refreshPngList();
@@ -387,3 +271,135 @@ document.querySelectorAll('.dropdown-content button').forEach(button => {
                 dropdown.classList.remove('active');
             });
         });
+
+// --- iPhone screen support ---
+async function fetchPngFilesForIphone(view = restoreCurrentView()) {
+    saveCurrentView(view);
+    iphonePngFiles = [];
+    iphoneCurrentIndex = 0;
+    iphonePreloadedImages = [];
+    try {
+        const response = await fetch(`/list_pngs/${view}`);
+        if (response.ok) {
+            iphonePngFiles = await response.json();
+            if (iphonePngFiles.length > 0) {
+                document.getElementById('iphone-slider').max = iphonePngFiles.length - 1;
+                restoreSliderPositionIphone();
+                updateIphoneImage();
+                preloadAdjacentImagesIphone();
+            } else {
+                document.getElementById('iphone-current-image').src = '';
+                document.getElementById('iphone-slider').max = 0;
+            }
+        } else {
+            console.error('Failed to fetch PNG files for iPhone view.');
+        }
+    } catch (err) {
+        console.error('Error fetching iPhone PNGs:', err);
+    }
+}
+
+function preloadAdjacentImagesIphone() {
+    const range = 2;
+    const start = Math.max(0, iphoneCurrentIndex - range);
+    const end = Math.min(iphonePngFiles.length - 1, iphoneCurrentIndex + range);
+    for (let i = start; i <= end; i++) {
+        if (!iphonePreloadedImages.includes(iphonePngFiles[i])) {
+            const img = new Image();
+            img.src = `${iphonePngFiles[i]}?t=${new Date().getTime()}`;
+            iphonePreloadedImages.push(iphonePngFiles[i]);
+        }
+    }
+}
+
+function updateIphoneImage() {
+    const imgElement = document.getElementById('iphone-current-image');
+    if (iphonePngFiles.length > 0) {
+        const newSrc = `${iphonePngFiles[iphoneCurrentIndex]}?t=${new Date().getTime()}`;
+        if (imgElement.src !== newSrc) imgElement.src = newSrc;
+        document.getElementById('iphone-slider').value = iphoneCurrentIndex;
+        localStorage.setItem('iphoneSliderPosition', iphoneCurrentIndex);
+    } else {
+        imgElement.src = '';
+    }
+}
+
+function restoreSliderPositionIphone() {
+    const savedPosition = localStorage.getItem('iphoneSliderPosition');
+    if (savedPosition !== null && iphonePngFiles.length > 0) {
+        iphoneCurrentIndex = Math.min(parseInt(savedPosition, 10), iphonePngFiles.length - 1);
+        document.getElementById('iphone-slider').value = iphoneCurrentIndex;
+        updateIphoneImage();
+    }
+}
+
+async function preloadAllImagesIphone() {
+    if (iphonePngFiles.length === 0) return;
+    await Promise.all(iphonePngFiles.map(src => {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            img.src = `${src}?t=${new Date().getTime()}`;
+        });
+    }));
+}
+
+async function handleIphoneViewButtonClick(view) {
+    saveCurrentView(view);
+    document.getElementById('iphone-slider').disabled = true;
+    const buttons = document.querySelectorAll('.iphone-var-button');
+    buttons.forEach(b => b.disabled = true);
+    await fetchPngFilesForIphone(view);
+    await preloadAllImagesIphone();
+    document.getElementById('iphone-slider').disabled = false;
+    buttons.forEach(b => b.disabled = false);
+}
+
+function openIphoneScreen() {
+    document.getElementById('iphone-screen').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    // initialize with restored (or saved) view
+    fetchPngFilesForIphone(restoreCurrentView());
+    preloadAllImagesIphone();
+}
+
+function closeIphoneScreen() {
+    document.getElementById('iphone-screen').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// iPhone button listeners
+document.getElementById('iphone-button').addEventListener('click', openIphoneScreen);
+document.getElementById('iphone-close-button').addEventListener('click', closeIphoneScreen);
+
+// iPhone variable buttons
+document.getElementById('iphone-temp-button').addEventListener('click', () => handleIphoneViewButtonClick('temp'));
+document.getElementById('iphone-snow-8-to-1-button').addEventListener('click', () => handleIphoneViewButtonClick('snow_8_to_1'));
+document.getElementById('iphone-snow-10-to-1-button').addEventListener('click', () => handleIphoneViewButtonClick('snow_10_to_1'));
+document.getElementById('iphone-precip-type-rate-button').addEventListener('click', () => handleIphoneViewButtonClick('precip_type_rate'));
+document.getElementById('iphone-wind-button').addEventListener('click', () => handleIphoneViewButtonClick('wind'));
+document.getElementById('iphone-total-precip-button').addEventListener('click', () => handleIphoneViewButtonClick('total_precip'));
+
+// iphone dropdown toggle
+document.getElementById('iphone-dropdown-button').addEventListener('click', () => {
+    const dd = document.getElementById('iphone-view-dropdown');
+    dd.classList.toggle('active');
+});
+
+// when a variable is chosen, collapse the iphone dropdown
+document.querySelectorAll('#iphone-view-dropdown .dropdown-content button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const dd = document.getElementById('iphone-view-dropdown');
+        dd.classList.remove('active');
+    });
+});
+
+// iPhone slider navigation
+document.getElementById('iphone-slider').addEventListener('input', (event) => {
+    const newValue = parseInt(event.target.value, 10);
+    // allow navigation by any amount on the iPhone view for smoother UX
+    iphoneCurrentIndex = Math.max(0, Math.min(newValue, iphonePngFiles.length - 1));
+    updateIphoneImage();
+    preloadAdjacentImagesIphone();
+});
