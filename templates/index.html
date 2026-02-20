@@ -118,7 +118,7 @@
         
     </header>
     <div id="main-container">
-        <button id="iphone-button" style="margin-left:12px; padding:8px 12px; border-radius:6px; border:none; cursor:pointer;">iPhone</button>
+        <button id="iphone-button" style="background-color: white; color: black; border: 1px solid #ccc; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1rem; width: 100%; max-width: 300px; text-align: left; display: block; margin: 10px 0;">iPhone</button>
             <div class="dropdown" id="view-dropdown">
                 <button id="dropdown-button">Variables</button>
                 <div class="dropdown-content">
@@ -165,7 +165,7 @@
             }
         </style>
     <!-- iPhone full-screen overlay -->
-    <div id="iphone-screen" style="display:none; position:fixed; inset:0; background:white; z-index:1000; overflow:auto;">
+    <div id="iphone-screen" style="display:none; position:fixed; inset:0; background:white; z-index:1000; overflow:hidden; flex-direction:column;">
         <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #e5e5e5;">
             <div class="dropdown iphone-dropdown" id="iphone-view-dropdown" style="width:auto;">
                 <button id="iphone-dropdown-button">Variables</button>
@@ -180,12 +180,12 @@
             </div>
             <button id="iphone-close-button" style="background:black; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">Close</button>
         </div>
-        <div style="display:flex; flex-direction:column; align-items:center; padding:18px;">
-            <div id="iphone-image-container" style="width:100%; max-width:980px; flex:1; display:flex; align-items:center; justify-content:center;">
-                <img id="iphone-current-image" src="" alt="HRRR PNG" style="width:100%; height:auto; max-height:70vh; object-fit:contain; background:white;" />
+        <div style="display:flex; flex-direction:column; align-items:center; padding:8px; flex:1;">
+            <div id="iphone-image-container" style="width:100%; max-width:980px; flex:1 1 auto; display:flex; align-items:center; justify-content:center; padding:8px 12px;">
+                <img id="iphone-current-image" src="" alt="HRRR PNG" style="width:100%; height:auto; max-height:calc(100vh - 160px); object-fit:contain; background:white;" />
             </div>
             <div style="width:100%; max-width:980px; margin-top:14px;">
-                <input type="range" id="iphone-slider" min="0" max="0" value="0" step="1" style="width:100%;" />
+                <input type="range" id="iphone-slider" min="0" max="0" value="0" step="1" style="width:100%; margin-bottom:18px;" />
             </div>
         </div>
     </div>
