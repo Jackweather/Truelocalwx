@@ -165,8 +165,8 @@
             }
         </style>
     <!-- iPhone full-screen overlay -->
-    <div id="iphone-screen" style="display:none; position:fixed; inset:0; background:white; z-index:1000; overflow:hidden; flex-direction:column;">
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #e5e5e5;">
+    <div id="iphone-screen">
+        <div class="iphone-header">
             <div class="dropdown iphone-dropdown" id="iphone-view-dropdown" style="width:auto;">
                 <button id="iphone-dropdown-button">Variables</button>
                 <div class="dropdown-content">
@@ -178,18 +178,79 @@
                     <button class="iphone-var-button" id="iphone-total-precip-button">Total Precip</button>
                 </div>
             </div>
-            <button id="iphone-close-button" style="background:black; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">Close</button>
+            <button id="iphone-close-button" class="iphone-close">Close</button>
         </div>
-        <div style="display:flex; flex-direction:column; align-items:center; padding:8px; flex:1;">
-            <div id="iphone-image-container" style="width:100%; max-width:980px; flex:1 1 auto; display:flex; align-items:center; justify-content:center; padding:8px 12px;">
-                <img id="iphone-current-image" src="" alt="HRRR PNG" style="width:100%; height:auto; max-height:calc(100vh - 160px); object-fit:contain; background:white;" />
+        <div class="iphone-content">
+            <div id="iphone-image-container">
+                <img id="iphone-current-image" src="" alt="HRRR PNG" />
             </div>
-            <div style="width:100%; max-width:980px; margin-top:14px;">
-                <input type="range" id="iphone-slider" min="0" max="0" value="0" step="1" style="width:100%; margin-bottom:18px;" />
-            </div>
+        </div>
+        <div class="iphone-footer">
+            <input type="range" id="iphone-slider" min="0" max="0" value="0" step="1" />
         </div>
     </div>
     <style>
+        /* iPhone overlay layout and safe-area handling */
+        #iphone-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 1000;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom, 16px);
+            padding-top: env(safe-area-inset-top, 12px);
+        }
+        .iphone-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e5e5;
+            flex: 0 0 auto;
+        }
+        .iphone-close {
+            background: black;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .iphone-content {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            overflow: auto;
+            padding: 8px 12px;
+        }
+        #iphone-image-container {
+            width: 100%;
+            max-width: 980px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 auto;
+        }
+        #iphone-current-image {
+            width: 100%;
+            height: 100%;
+            max-height: none;
+            object-fit: contain;
+            background: white;
+        }
+        .iphone-footer {
+            flex: 0 0 auto;
+            padding: 12px 16px;
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+        }
+        .iphone-footer input[type="range"] {
+            width: 100%;
+        }
         .iphone-var-button {
             background: black;
             color: white;
