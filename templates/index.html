@@ -1,342 +1,130 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HRRR PNG Viewer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        header {
-            background-color: #87CEEB; /* Light blue */
-            color: white;
-            padding: 10px;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-        #main-container {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 10px;
-        }
-        #view-dropdown {
-            margin: 10px 0;
-            width: 100%;
-            max-width: 300px;
-        }
-        .dropdown {
-            position: relative;
-            width: 100%;
-        }
-        .dropdown button {
-            background-color: white; /* Traditional white dropdown */
-            color: black; /* Black text for contrast */
-            border: 1px solid #ccc; /* Light gray border */
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-            width: 100%;
-            text-align: left;
-        }
-        .dropdown button:hover {
-            background-color: #f0f0f0; /* Light gray on hover */
-        }
-        .dropdown-content {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: white; /* White background for dropdown items */
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            width: 100%;
-            display: none;
-            flex-direction: column;
-            margin-top: 10px;
-            border: 1px solid #ccc; /* Light gray border */
-        }
-        .dropdown-content button {
-            width: 100%;
-            text-align: left;
-            padding: 10px;
-            border: none;
-            background: none;
-            color: black; /* Black text for dropdown items */
-            cursor: pointer;
-        }
-        .dropdown-content button:hover {
-            background-color: #f0f0f0; /* Light gray on hover */
-        }
-        .dropdown.active .dropdown-content {
-            display: flex;
-        }
-        #content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-        #image-container {
-            max-width: 90%;
-            max-height: 70vh;
-        }
-        #image-container img {
-            max-width: 100%;
-            max-height: 100%;
-        }
-        #controls {
-            margin: 20px;
-            width: 100%;
-            max-width: 300px;
-        }
-        #slider {
-            width: 100%;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NY Fullscreen Viewer</title>
+  <style>
+    html,body{height:100%;margin:0;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
+    .top-label{font-size:12px;color:#ddd;text-align:center;padding:8px 0}
+    .top-left{position:fixed;left:12px;top:8px}
+    .top-right{position:fixed;right:12px;top:8px}
+    .img-wrap{height:calc(100vh - 92px);display:flex;align-items:center;justify-content:center}
+    img{max-width:100%;max-height:100%;object-fit:contain}
+    .controls{height:48px;display:flex;align-items:center;justify-content:center;padding:8px}
+    .dropdown{position:relative}
+    .dropdown button{padding:8px 12px;border-radius:6px;border:none;background:#fff;color:#000;cursor:pointer}
+    .dropdown .dropdown-content{position:absolute;top:100%;left:0;background:#fff;color:#000;display:none;flex-direction:column;border-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,0.3);overflow:hidden}
+    .dropdown.active .dropdown-content{display:flex}
+    .dropdown .dropdown-content button{background:none;border:none;padding:8px 12px;text-align:left;cursor:pointer}
+    .close-btn{padding:8px 12px;border-radius:6px;border:none;background:#fff;color:#000;cursor:pointer}
+  </style>
 </head>
 <body>
-    <header>
-        <h1>New-York-State Weather models</h1>
-        <button id="fullscreen-button" title="Open fullscreen view" style="margin-left:12px; padding:8px 12px; border-radius:6px; border:none; background:#ffffff33; color:white; cursor:pointer;">Fullscreen</button>
-    </header>
-    <div id="main-container">
-        <div id="sidebar">
-            <div class="dropdown" id="view-dropdown">
-                <button id="dropdown-button">Variables</button>
-                <div class="dropdown-content">
-                    <button id="temp-button">2m-Temp</button>
-                    <button id="snow-8-to-1-button">Snow 8-to-1</button>
-                    <button id="snow-10-to-1-button">Snow 10-to-1</button>
-                    <button id="precip-type-rate-button">Precip Type Rate</button>
-                    <button id="wind-button">10m-Wind</button>
-                    <button id="total-precip-button">Total Precip</button>
-                </div>
-            </div>
-        </div>
-        <div id="content">
-            <div id="image-container">
-                <img id="current-image" src="" alt="HRRR PNG" />
-            </div>
-            <div id="controls">
-                <input type="range" id="slider" min="0" max="0" value="0" step="1">
-            </div>
-            <div id="loading-overlay" style="display:none; position:absolute; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,0.7); z-index:200; align-items:center; justify-content:center;">
-                <div style="display:flex; flex-direction:column; align-items:center;">
-                    <div class="spinner" style="border:8px solid #f3f3f3; border-top:8px solid #3498db; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite;"></div>
-                    <div style="margin-top:16px; font-size:1.2rem; color:#3498db;">Loading images...</div>
-                </div>
-            </div>
-        </div>
+  <div class="top-left">
+    <div class="dropdown" id="fs-dropdown">
+      <button id="fs-vars-button">Variables</button>
+      <div class="dropdown-content" id="fs-vars-list">
+        <button data-view="mslp">MSLP</button>
+        <button data-view="temp">2m-Temp</button>
+        <button data-view="snow_8_to_1">Snow 8-to-1</button>
+        <button data-view="snow_10_to_1">Snow 10-to-1</button>
+        <button data-view="precip_type_rate">Precip Type Rate</button>
+        <button data-view="wind">10m-Wind</button>
+        <button data-view="total_precip">Total Precip</button>
+      </div>
     </div>
-    <!-- Fullscreen overlay -->
-    <div id="fullscreen-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:10000; align-items:center; justify-content:center; flex-direction:column;"> 
-        <button id="fullscreen-close" style="position:absolute; top:18px; right:18px; background:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">Close</button>
-        <div style="position:absolute; top:12px; left:18px; display:flex; gap:8px; align-items:center;">
-            <div class="dropdown" id="fs-left-view-dropdown" style="position:relative;">
-                <button id="fs-left-dropdown-button" style="padding:8px 12px; border-radius:6px; border:none; background:#fcfbfbf5; color:rgb(0, 0, 0); cursor:pointer;">Variables</button>
-                <div class="dropdown-content" style="left:0; right:auto;">
-                    <button id="fs-left-temp-button">2m-Temp</button>
-                    <button id="fs-left-snow-8-to-1-button">Snow 8-to-1</button>
-                    <button id="fs-left-snow-10-to-1-button">Snow 10-to-1</button>
-                    <button id="fs-left-precip-type-rate-button">Precip Type Rate</button>
-                    <button id="fs-left-wind-button">10m-Wind</button>
-                    <button id="fs-left-total-precip-button">Total Precip</button>
-                </div>
-            </div>
-        </div>
-        <div style="max-width:95%; max-height:85%; display:flex; align-items:center; justify-content:center;">
-            <img id="fullscreen-image" src="" alt="Fullscreen PNG" style="max-width:100%; max-height:100%; object-fit:contain;" />
-        </div>
-        <div style="width:90%; max-width:900px; margin-top:14px; display:flex; align-items:center; gap:12px;">
-            <input type="range" id="fullscreen-slider" min="0" max="0" value="0" step="1" style="width:100%;">
-        </div>
-    </div>
-        <style>
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
+  </div>
+  <div class="top-right"><button class="close-btn" onclick="window.close()">Close</button></div>
+  <div class="top-label">Nyweathermodels</div>
+  <div class="img-wrap">
+    <img id="fswin-img" src="" alt="Fullscreen PNG">
+  </div>
+  <div class="controls">
+    <input id="fswin-slider" type="range" min="0" max="0" value="0" step="1" style="width:80%">
+  </div>
+
+  <script>
+    (function(){
+      const img = document.getElementById('fswin-img');
+      const slider = document.getElementById('fswin-slider');
+      const fsDropdown = document.getElementById('fs-dropdown');
+      const fsVarsButton = document.getElementById('fs-vars-button');
+      const fsVarsList = document.getElementById('fs-vars-list');
+
+      let files = [];
+      let idx = 0;
+
+      // Try to load files from localStorage (set by opener)
+      try{
+        const stored = localStorage.getItem('fsFullscreenPngs');
+        if (stored){ files = JSON.parse(stored); }
+        const sidx = localStorage.getItem('fsStartIndex');
+        if (sidx) idx = Number(sidx) || 0;
+        // cleanup stored keys so they don't persist unnecessarily
+        localStorage.removeItem('fsFullscreenPngs');
+        localStorage.removeItem('fsStartIndex');
+      }catch(e){ files = []; idx = 0 }
+
+      function update(){
+        if (files.length > 0){
+          idx = Math.max(0, Math.min(files.length-1, idx));
+          img.src = files[idx] + '?t=' + Date.now();
+          slider.max = Math.max(0, files.length-1);
+          slider.value = idx;
+        } else {
+          img.src = '';
+          slider.max = 0;
+          slider.value = 0;
+        }
+      }
+
+      slider.addEventListener('input', ()=>{ idx = Number(slider.value); update(); });
+
+      document.addEventListener('keydown',(e)=>{
+        if (e.key === 'ArrowLeft'){ idx = Math.max(0, idx-1); update(); }
+        if (e.key === 'ArrowRight'){ idx = Math.min(files.length-1, idx+1); update(); }
+        if (e.key === 'Escape') window.close();
+      });
+
+      // Dropdown toggle
+      fsVarsButton.addEventListener('click', (ev)=>{ ev.stopPropagation(); fsDropdown.classList.toggle('active'); });
+      document.addEventListener('click', ()=> fsDropdown.classList.remove('active'));
+
+      // Wire variable buttons to fetch png list for fullscreen only
+      fsVarsList.querySelectorAll('button').forEach(b=>{
+        b.addEventListener('click', async (ev)=>{
+          ev.stopPropagation();
+          const view = b.getAttribute('data-view');
+          try{
+            const resp = await fetch(`/list_pngs/${view}`);
+            if (resp.ok){
+              const list = await resp.json();
+              files = list || [];
+              idx = 0;
+              update();
             }
-            #loading-overlay {
-                display: none;
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(255,255,255,0.7);
-                z-index: 200;
-                align-items: center;
-                justify-content: center;
+          }catch(err){ console.error('Failed to fetch fullscreen list', err); }
+          fsDropdown.classList.remove('active');
+        });
+      });
+
+      // If no files were provided via opener/localStorage, load precip type by default
+      (async function loadDefaultIfEmpty(){
+        if (!files || files.length === 0){
+          try{
+            const resp = await fetch('/list_pngs/precip_type_rate');
+            if (resp.ok){
+              const list = await resp.json();
+              files = list || [];
+              idx = 0;
             }
-        </style>
-    <script src="/static/NY.js"></script>
-    <script>
-        (function(){
-            const fsButton = document.getElementById('fullscreen-button');
-            const overlay = document.getElementById('fullscreen-overlay');
-            const fsImage = document.getElementById('fullscreen-image');
-            const fsSlider = document.getElementById('fullscreen-slider');
-            const mainImage = document.getElementById('current-image');
-            const mainSlider = document.getElementById('slider');
-            const fsClose = document.getElementById('fullscreen-close');
-
-            // Separate fullscreen state so it does NOT affect main viewer
-            let fsPngFiles = [];
-            let fsCurrentIndex = 0;
-
-            function openOverlay(){
-                // copy png list and index from the main script without linking
-                try {
-                    fsPngFiles = (typeof pngFiles !== 'undefined') ? pngFiles.slice() : [];
-                    fsCurrentIndex = (typeof currentIndex !== 'undefined') ? currentIndex : 0;
-                } catch(e){ fsPngFiles = []; fsCurrentIndex = 0; }
-
-                // configure slider for fullscreen
-                fsSlider.min = fsPngFiles.length > 0 ? 0 : 0;
-                fsSlider.max = fsPngFiles.length > 0 ? Math.max(0, fsPngFiles.length - 1) : 0;
-                fsSlider.step = 1;
-                fsSlider.value = fsCurrentIndex;
-
-                // set fullscreen image independently
-                if (fsPngFiles.length > 0){
-                    fsImage.src = `${fsPngFiles[fsCurrentIndex]}?t=${new Date().getTime()}`;
-                } else {
-                    // fallback to whatever the main image currently shows
-                    fsImage.src = mainImage.src || '';
-                }
-
-                overlay.style.display = 'flex';
-                if (overlay.requestFullscreen) overlay.requestFullscreen().catch(()=>{});
-                fsSlider.focus();
-            }
-
-            function closeOverlay(){
-                overlay.style.display = 'none';
-                try { if (document.fullscreenElement) document.exitFullscreen().catch(()=>{}); } catch(e){}
-            }
-
-            // When fullscreen slider moves, only update fullscreen image (do NOT update main viewer)
-            fsSlider.addEventListener('input', (e)=>{
-                const v = Number(e.target.value);
-                fsCurrentIndex = v;
-                if (fsPngFiles.length > 0){
-                    fsImage.src = `${fsPngFiles[fsCurrentIndex]}?t=${new Date().getTime()}`;
-                }
-            });
-
-            // If main slider changes (NY.js), update fullscreen's copy only if overlay is open
-            if (mainSlider){
-                mainSlider.addEventListener('input', ()=>{
-                    if (overlay.style.display !== 'none'){
-                        try {
-                            fsPngFiles = (typeof pngFiles !== 'undefined') ? pngFiles.slice() : fsPngFiles;
-                            fsCurrentIndex = (typeof currentIndex !== 'undefined') ? currentIndex : fsCurrentIndex;
-                            fsSlider.max = fsPngFiles.length > 0 ? Math.max(0, fsPngFiles.length - 1) : 0;
-                            fsSlider.value = fsCurrentIndex;
-                            if (fsPngFiles.length > 0) fsImage.src = `${fsPngFiles[fsCurrentIndex]}?t=${new Date().getTime()}`;
-                        } catch(e){}
-                    }
-                });
-            }
-
-            // Capture-phase keydown handler to prevent NY.js from handling arrow keys when fullscreen is open
-            document.addEventListener('keydown', function(e){
-                if (overlay.style.display === 'none') return; // let NY.js handle
-                if (e.key === 'Escape'){
-                    e.stopImmediatePropagation();
-                    e.preventDefault();
-                    closeOverlay();
-                    return;
-                }
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight'){
-                    e.stopImmediatePropagation();
-                    e.preventDefault();
-                    const dir = e.key === 'ArrowLeft' ? -1 : 1;
-                    let v = fsCurrentIndex + dir;
-                    v = Math.max(Number(fsSlider.min), Math.min(Number(fsSlider.max), v));
-                    fsCurrentIndex = v;
-                    fsSlider.value = v;
-                    // update fullscreen image
-                    if (fsPngFiles.length > 0) fsImage.src = `${fsPngFiles[fsCurrentIndex]}?t=${new Date().getTime()}`;
-                }
-            }, true);
-
-            // Clicking the fullscreen button opens overlay
-            fsButton.addEventListener('click', openOverlay);
-            fsClose.addEventListener('click', closeOverlay);
-
-            // Close when clicking outside the image (on overlay background)
-            overlay.addEventListener('click', (e)=>{
-                if (e.target === overlay) closeOverlay();
-            });
-
-            // When clicking anywhere on the page, focus the appropriate slider
-            document.addEventListener('click', (e) => {
-                if (overlay.style.display !== 'none'){
-                    try { fsSlider.focus(); } catch(err){}
-                } else {
-                    try { if (mainSlider) mainSlider.focus(); } catch(err){}
-                }
-            });
-
-            // Left fullscreen dropdown toggle (top-left)
-            const fsLeftDropdown = document.getElementById('fs-left-view-dropdown');
-            const fsLeftButton = document.getElementById('fs-left-dropdown-button');
-            fsLeftButton.addEventListener('click', (ev)=>{ ev.stopPropagation(); fsLeftDropdown.classList.toggle('active'); });
-            // Close left dropdown when clicking elsewhere
-            document.addEventListener('click', ()=> fsLeftDropdown.classList.remove('active'));
-
-            // Wire left fullscreen dropdown buttons to behave like main screen (call main handler)
-            function wireLeftFsButton(id, view){
-                const btn = document.getElementById(id);
-                if (!btn) return;
-                btn.addEventListener('click', (ev)=>{
-                    ev.stopPropagation();
-                    try { saveCurrentView(view); } catch(e){}
-                    try { handleViewButtonClick(view); } catch(e){ console.error('handleViewButtonClick not available', e); }
-                    // Also update fullscreen's own list so fullscreen shows the new view immediately
-                    (async ()=>{
-                        try {
-                            const resp = await fetch(`/list_pngs/${view}`);
-                            if (resp.ok){
-                                const list = await resp.json();
-                                fsPngFiles = list || [];
-                                fsCurrentIndex = 0;
-                                fsSlider.max = fsPngFiles.length > 0 ? Math.max(0, fsPngFiles.length - 1) : 0;
-                                fsSlider.value = fsCurrentIndex;
-                                if (fsPngFiles.length > 0) fsImage.src = `${fsPngFiles[0]}?t=${new Date().getTime()}`;
-                                else fsImage.src = '';
-                            }
-                        } catch(err){ console.error('Failed to update fullscreen list', err); }
-                    })();
-                    fsLeftDropdown.classList.remove('active');
-                });
-            }
-            wireLeftFsButton('fs-left-temp-button', 'temp');
-            wireLeftFsButton('fs-left-snow-8-to-1-button', 'snow_8_to_1');
-            wireLeftFsButton('fs-left-snow-10-to-1-button', 'snow_10_to_1');
-            wireLeftFsButton('fs-left-precip-type-rate-button', 'precip_type_rate');
-            wireLeftFsButton('fs-left-wind-button', 'wind');
-            wireLeftFsButton('fs-left-total-precip-button', 'total_precip');
-        })();
-    </script>
+          }catch(err){ console.error('Failed to fetch default precip list', err); }
+        }
+        // initialize display regardless
+        update();
+      })();
+    })();
+  </script>
 </body>
 </html>
