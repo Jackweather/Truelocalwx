@@ -118,6 +118,12 @@
                 margin-top: 0; /* Remove the gap above the PNG */
             }
         }
+        @media (max-width: 768px) and (orientation: portrait) {
+            #image-container {
+                max-height: 95vh; /* Expand the PNG to take up almost the full vertical space in portrait mode */
+                margin-top: 0; /* Remove any gap above the PNG */
+            }
+        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
