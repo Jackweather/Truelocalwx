@@ -114,11 +114,11 @@
 </head>
 <body>
     <header>
-        <h1>Truelocalwx</h1>
-        
+        <h1>New-York-State Weather models</h1>
+        <button id="fullscreen-button" title="Open fullscreen view" style="margin-left:12px; padding:8px 12px; border-radius:6px; border:none; background:#ffffff33; color:white; cursor:pointer;">Fullscreen</button>
     </header>
     <div id="main-container">
-        <button id="iphone-button" style="background-color: white; color: black; border: 1px solid #ccc; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 1rem; width: 100%; max-width: 300px; text-align: left; display: block; margin: 10px 0;">iPhone</button>
+        <div id="sidebar">
             <div class="dropdown" id="view-dropdown">
                 <button id="dropdown-button">Variables</button>
                 <div class="dropdown-content">
@@ -146,6 +146,16 @@
             </div>
         </div>
     </div>
+    <!-- Fullscreen overlay -->
+    <div id="fullscreen-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:10000; align-items:center; justify-content:center; flex-direction:column;"> 
+        <button id="fullscreen-close" style="position:absolute; top:18px; right:18px; background:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer;">Close</button>
+        <div style="max-width:95%; max-height:85%; display:flex; align-items:center; justify-content:center;">
+            <img id="fullscreen-image" src="" alt="Fullscreen PNG" style="max-width:100%; max-height:100%; object-fit:contain;" />
+        </div>
+        <div style="width:90%; max-width:900px; margin-top:14px; display:flex; align-items:center; gap:12px;">
+            <input type="range" id="fullscreen-slider" min="0" max="0" value="0" step="1" style="width:100%;">
+        </div>
+    </div>
         <style>
             @keyframes spin {
                 0% { transform: rotate(0deg); }
@@ -164,114 +174,90 @@
                 justify-content: center;
             }
         </style>
-    <!-- iPhone full-screen overlay -->
-    <div id="iphone-screen">
-        <div class="iphone-header">
-            <div class="dropdown iphone-dropdown" id="iphone-view-dropdown" style="width:auto;">
-                <button id="iphone-dropdown-button">Variables</button>
-                <div class="dropdown-content">
-                    <button class="iphone-var-button" id="iphone-temp-button">2m-Temp</button>
-                    <button class="iphone-var-button" id="iphone-snow-8-to-1-button">Snow 8-to-1</button>
-                    <button class="iphone-var-button" id="iphone-snow-10-to-1-button">Snow 10-to-1</button>
-                    <button class="iphone-var-button" id="iphone-precip-type-rate-button">Precip Type Rate</button>
-                    <button class="iphone-var-button" id="iphone-wind-button">10m-Wind</button>
-                    <button class="iphone-var-button" id="iphone-total-precip-button">Total Precip</button>
-                </div>
-            </div>
-            <button id="iphone-close-button" class="iphone-close">Close</button>
-        </div>
-        <div class="iphone-content">
-            <div id="iphone-image-container">
-                <img id="iphone-current-image" src="" alt="HRRR PNG" />
-            </div>
-        </div>
-        <div class="iphone-footer">
-            <input type="range" id="iphone-slider" min="0" max="0" value="0" step="1" />
-        </div>
-    </div>
-    <style>
-        /* iPhone overlay layout and safe-area handling */
-        #iphone-screen {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: white;
-            z-index: 1000;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            padding-bottom: env(safe-area-inset-bottom, 16px);
-            padding-top: env(safe-area-inset-top, 12px);
-        }
-        .iphone-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid #e5e5e5;
-            flex: 0 0 auto;
-        }
-        .iphone-close {
-            background: black;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .iphone-content {
-            flex: 1 1 auto;
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-            overflow: auto;
-            padding: 8px 12px;
-        }
-        #iphone-image-container {
-            width: 100%;
-            max-width: 980px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1 1 auto;
-        }
-        #iphone-current-image {
-            width: 100%;
-            height: 100%;
-            max-height: none;
-            object-fit: contain;
-            background: white;
-        }
-        .iphone-footer {
-            flex: 0 0 auto;
-            padding: 12px 16px;
-            box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
-        }
-        .iphone-footer input[type="range"] {
-            width: 100%;
-        }
-        .iphone-var-button {
-            background: black;
-            color: white;
-            border: none;
-            padding: 8px 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.95rem;
-            width:100%;
-            text-align:left;
-        }
-        .iphone-var-button:disabled {
-            opacity: 0.5;
-            cursor: default;
-        }
-        /* ensure dropdown inside iphone overlay displays nicely */
-        .iphone-dropdown { position: relative; }
-        .iphone-dropdown .dropdown-content { width:220px; display:none; flex-direction:column; margin-top:8px; }
-        .iphone-dropdown.active .dropdown-content { display:flex; }
-        .iphone-dropdown .dropdown-content button { background: black; color: white; margin:4px 8px; border-radius:6px; padding:8px 10px; }
-    </style>
     <script src="/static/NY.js"></script>
+    <script>
+        (function(){
+            const fsButton = document.getElementById('fullscreen-button');
+            const overlay = document.getElementById('fullscreen-overlay');
+            const fsImage = document.getElementById('fullscreen-image');
+            const fsSlider = document.getElementById('fullscreen-slider');
+            const mainImage = document.getElementById('current-image');
+            const mainSlider = document.getElementById('slider');
+            const fsClose = document.getElementById('fullscreen-close');
+
+            function openOverlay(){
+                // copy current image and slider state
+                fsImage.src = mainImage.src || '';
+                try {
+                    fsSlider.min = mainSlider.min;
+                    fsSlider.max = mainSlider.max;
+                    fsSlider.step = mainSlider.step || 1;
+                    fsSlider.value = mainSlider.value;
+                } catch(e){}
+
+                overlay.style.display = 'flex';
+                // try to enter browser fullscreen for overlay
+                if (overlay.requestFullscreen) overlay.requestFullscreen().catch(()=>{});
+                // focus for key handlers
+                fsSlider.focus();
+            }
+
+            function closeOverlay(){
+                overlay.style.display = 'none';
+                try { if (document.fullscreenElement) document.exitFullscreen().catch(()=>{}); } catch(e){}
+            }
+
+            // When fullscreen slider moves, forward value to main slider and trigger input
+            fsSlider.addEventListener('input', (e)=>{
+                if (!mainSlider) return;
+                mainSlider.value = e.target.value;
+                mainSlider.dispatchEvent(new Event('input'));
+                // sync image after main slider updates
+                setTimeout(()=>{ fsImage.src = mainImage.src || fsImage.src; }, 10);
+            });
+
+            // When main slider changes (likely due to NY.js), update fullscreen image if open
+            if (mainSlider){
+                mainSlider.addEventListener('input', ()=>{
+                    if (overlay.style.display !== 'none'){
+                        fsImage.src = mainImage.src || fsImage.src;
+                        try { fsSlider.value = mainSlider.value; } catch(e){}
+                    }
+                });
+            }
+
+            // Clicking the fullscreen button opens overlay
+            fsButton.addEventListener('click', openOverlay);
+            fsClose.addEventListener('click', closeOverlay);
+
+            // Close on Escape
+            document.addEventListener('keydown', (e)=>{
+                if (e.key === 'Escape' && overlay.style.display !== 'none') closeOverlay();
+                if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && overlay.style.display !== 'none'){
+                    const dir = e.key === 'ArrowLeft' ? -1 : 1;
+                    const step = Number(fsSlider.step) || 1;
+                    let v = Number(fsSlider.value) + dir*step;
+                    v = Math.max(Number(fsSlider.min), Math.min(Number(fsSlider.max), v));
+                    fsSlider.value = v;
+                    fsSlider.dispatchEvent(new Event('input'));
+                }
+            });
+
+            // Close when clicking outside the image (on overlay background)
+            overlay.addEventListener('click', (e)=>{
+                if (e.target === overlay) closeOverlay();
+            });
+
+            // When clicking anywhere on the page, focus the appropriate slider
+            document.addEventListener('click', (e) => {
+                // prefer the fullscreen slider when overlay is visible
+                if (overlay.style.display !== 'none'){
+                    try { fsSlider.focus(); } catch(err){}
+                } else {
+                    try { if (mainSlider) mainSlider.focus(); } catch(err){}
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
