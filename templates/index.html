@@ -54,6 +54,7 @@
 
       let files = [];
       let idx = 0;
+      let isLoading = false; // true while preloading images
 
       // Try to load files from localStorage (set by opener)
       try{
@@ -72,16 +73,19 @@
           img.src = files[idx] + '?t=' + Date.now();
           slider.max = Math.max(0, files.length-1);
           slider.value = idx;
+          slider.disabled = isLoading || files.length === 0;
         } else {
           img.src = '';
           slider.max = 0;
           slider.value = 0;
+          slider.disabled = true;
         }
       }
 
-      slider.addEventListener('input', ()=>{ idx = Number(slider.value); update(); });
+      slider.addEventListener('input', ()=>{ if (isLoading) return; idx = Number(slider.value); update(); });
 
       document.addEventListener('keydown',(e)=>{
+        if (isLoading) return;
         if (e.key === 'ArrowLeft'){ idx = Math.max(0, idx-1); update(); }
         if (e.key === 'ArrowRight'){ idx = Math.min(files.length-1, idx+1); update(); }
         if (e.key === 'Escape') window.close();
@@ -91,20 +95,38 @@
       fsVarsButton.addEventListener('click', (ev)=>{ ev.stopPropagation(); fsDropdown.classList.toggle('active'); });
       document.addEventListener('click', ()=> fsDropdown.classList.remove('active'));
 
+      // Helper to preload image URLs, resolves when all attempted
+      function preloadImages(urls){
+        return Promise.all(urls.map(u=>new Promise((resolve)=>{
+          const im = new Image();
+          im.onload = () => resolve({url:u,ok:true});
+          im.onerror = () => resolve({url:u,ok:false});
+          im.src = u + '?t=' + Date.now();
+        })));
+      }
+
       // Wire variable buttons to fetch png list for fullscreen only
       fsVarsList.querySelectorAll('button').forEach(b=>{
         b.addEventListener('click', async (ev)=>{
           ev.stopPropagation();
           const view = b.getAttribute('data-view');
+          // start loading lock
+          isLoading = true;
+          slider.disabled = true;
           try{
             const resp = await fetch(`/list_pngs/${view}`);
             if (resp.ok){
-              const list = await resp.json();
-              files = list || [];
+              const list = await resp.json() || [];
+              // preload images before enabling navigation
+              try{
+                await preloadImages(list);
+              }catch(_){ /* proceed even if some fail */ }
+              files = list;
               idx = 0;
-              update();
             }
           }catch(err){ console.error('Failed to fetch fullscreen list', err); }
+          isLoading = false;
+          update();
           fsDropdown.classList.remove('active');
         });
       });
@@ -112,14 +134,18 @@
       // If no files were provided via opener/localStorage, load precip type by default
       (async function loadDefaultIfEmpty(){
         if (!files || files.length === 0){
+          isLoading = true;
+          slider.disabled = true;
           try{
             const resp = await fetch('/list_pngs/precip_type_rate');
             if (resp.ok){
-              const list = await resp.json();
-              files = list || [];
+              const list = await resp.json() || [];
+              try{ await preloadImages(list); }catch(_){ }
+              files = list;
               idx = 0;
             }
           }catch(err){ console.error('Failed to fetch default precip list', err); }
+          isLoading = false;
         }
         // initialize display regardless
         update();
